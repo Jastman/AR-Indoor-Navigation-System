@@ -5,7 +5,7 @@ using Vuforia;
 
 public class TempButtonScript : MonoBehaviour {
 
-	public float xRotateDegree = 0;
+	public float yRotateDegree = 0;
 
 	private GameObject arcamera;
 
@@ -21,24 +21,24 @@ public class TempButtonScript : MonoBehaviour {
 
 	public void RotateLeft()
 	{
-		xRotateDegree += 10;
+		yRotateDegree += 10;
 		
 		IEnumerable<TrackableBehaviour> trackableList = arcamera.GetComponent<CameraFocusController>().GetActiveTrackable();
 		foreach (TrackableBehaviour tr in trackableList)
 		{
-			tr.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().RotateArrow(new Vector3(0, xRotateDegree, 0));
+			tr.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().RotateArrow(new Vector3(0, yRotateDegree, 0));
 			Debug.Log(tr.gameObject.name + " to Left");
 		}
 	}
 
 	public void RotateRight()
 	{
-		xRotateDegree -= 10;
+		yRotateDegree -= 10;
 
 		IEnumerable<TrackableBehaviour> trackableList = arcamera.GetComponent<CameraFocusController>().GetActiveTrackable();
 		foreach (TrackableBehaviour tr in trackableList)
 		{
-			tr.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().RotateArrow(new Vector3(0, xRotateDegree, 0));
+			tr.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().RotateArrow(new Vector3(0, yRotateDegree, 0));
 			Debug.Log(tr.gameObject.name + " to Right");
 		}
 	}

@@ -6,7 +6,7 @@ public class ArrowScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		
+		Debug.Log("start");
 	}
 	
 	// Update is called once per frame
@@ -14,10 +14,11 @@ public class ArrowScript : MonoBehaviour {
 		
 	}
 
+	/* get world coordinate that want to rotate. rotate to input */
 	public void RotateArrow(Vector3 eulerRotation)
 	{
+		transform.rotation = Quaternion.identity;
 		transform.Rotate(eulerRotation, Space.World);
-		transform.Rotate(eulerRotation, Space.World);
-		Debug.Log(transform.rotation + " " + (eulerRotation.x-transform.rotation.x));
+		Debug.Log(transform.rotation.eulerAngles + " " + (eulerRotation.y-transform.rotation.y) + " " + eulerRotation.y);
 	}
 }
