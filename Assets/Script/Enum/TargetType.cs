@@ -4,6 +4,14 @@ using UnityEngine;
 
 public class TargetType : MonoBehaviour {
 
+	public enum TargetT
+     {
+         ldpi,
+         mdpi,
+         hdpi,
+         xhdpi
+     }
+
 	// Use this for initialization
 	void Start () {
 		
