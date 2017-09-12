@@ -16,8 +16,11 @@ public class CanvasResolutionScript : MonoBehaviour {
      }
 
 	private float actionBarHeight;
+
+	public GameObject actionBar;
 	public Image actionBarImage;
-	private RectTransform actionBar, mapButton, searchButton, hambergerButton;
+	private RectTransform actionBarRect, searchInputField, appName;
+	private RectTransform mapButton, searchButton, hambergerButton, backButton, clearButton;
 
 	
 
@@ -26,22 +29,25 @@ public class CanvasResolutionScript : MonoBehaviour {
 		Screen.fullScreen = false;
 		actionBarHeight = DpToPixel(100);
 
-		actionBar = actionBarImage.gameObject.GetComponent<RectTransform>();
-		actionBar.sizeDelta = new Vector2(Screen.width, actionBarHeight);
-		actionBar.anchoredPosition = new Vector2(0, actionBarHeight/-2) ;
+		actionBarRect = actionBarImage.gameObject.GetComponent<RectTransform>();
+		actionBarRect.sizeDelta = new Vector2(Screen.width, actionBarHeight);
+		actionBarRect.anchoredPosition = new Vector2(0, actionBarHeight/-2) ;
 		
 		mapButton = actionBarImage.gameObject.transform.Find("MapButton").GetComponent<RectTransform>();
-		mapButton.sizeDelta = new Vector2(topButtonSize(), topButtonSize());
-		mapButton.anchoredPosition = new Vector2((topButtonPosition()*-1), topButtonPosition()*-1);
-		
+		SetMapButtonInMain();
 
 		searchButton = actionBarImage.gameObject.transform.Find("SearchButton").GetComponent<RectTransform>();
-		searchButton.sizeDelta = new Vector2(topButtonSize(), topButtonSize());
-		searchButton.anchoredPosition = new Vector2(topButtonPosition()*-1 - topButtonSize() - topButtonPadding(), topButtonPosition()*-1);
+		SetSearchButtonInMain();
 		
 		hambergerButton = actionBarImage.gameObject.transform.Find("HambergerButton").GetComponent<RectTransform>();
-		hambergerButton.sizeDelta = new Vector2(topButtonSize(), topButtonSize());
-		hambergerButton.anchoredPosition = new Vector2(topButtonPosition(), topButtonPosition()*-1);
+		SetHambergerButtonInMain();
+
+		appName = actionBarImage.gameObject.transform.Find("AppName").GetComponent<RectTransform>();
+		SetAppNameInMain();
+
+		backButton = actionBarImage.gameObject.transform.Find("BackButton").GetComponent<RectTransform>();
+		searchInputField = actionBarImage.gameObject.transform.Find("SearchInputField").GetComponent<RectTransform>();
+		clearButton = searchInputField.gameObject.transform.Find("ClearSearchButton").GetComponent<RectTransform>();
 	}
 	
 	// Update is called once per frame
@@ -49,6 +55,51 @@ public class CanvasResolutionScript : MonoBehaviour {
 		
 	}
 
+	/* set position and size of button */
+	public void SetMapButtonInMain()
+	{
+		mapButton.sizeDelta = new Vector2(topButtonSize(), topButtonSize());
+		mapButton.anchoredPosition = new Vector2((topButtonPosition()*-1), topButtonPosition()*-1);
+	}
+	public void SetSearchButtonInMain()
+	{
+		searchButton.sizeDelta = new Vector2(topButtonSize(), topButtonSize());
+		searchButton.anchoredPosition = new Vector2(topButtonPosition()*-1 - topButtonSize() - topButtonPadding(), topButtonPosition()*-1);
+	}
+	public void SetHambergerButtonInMain()
+	{
+		hambergerButton.sizeDelta = new Vector2(topButtonSize(), topButtonSize());
+		hambergerButton.anchoredPosition = new Vector2(topButtonPosition(), topButtonPosition()*-1);
+	}
+
+	public void SetAppNameInMain()
+	{
+		appName.sizeDelta = new Vector2(Screen.width - (actionBarHeight*3), topButtonSize());
+		appName.anchoredPosition = new Vector2(appName.sizeDelta.x/2 + actionBarHeight, 0);
+	}
+
+	
+
+	public void SetBackButtonInSearch()
+	{
+		backButton.sizeDelta = new Vector2(topButtonSize(), topButtonSize());
+		searchButton.anchoredPosition = new Vector2((topButtonPosition()*-1), topButtonPosition()*-1);
+	}
+	public void SetClearButtonInSearch()
+	{
+		clearButton.sizeDelta = new Vector2(actionBarHeight*0.3f, actionBarHeight*0.3f);
+		clearButton.anchoredPosition = new Vector2((clearButton.sizeDelta.x/2) + (actionBarHeight*0.1f) , 0);
+	}
+	public void SetSearchFieldInSearch()
+	{
+		searchInputField.sizeDelta = new Vector2(Screen.width - actionBarHeight - (actionBarHeight*0.5f), topButtonSize());
+		searchInputField.anchoredPosition = new Vector2(searchInputField.sizeDelta.x/2 + actionBarHeight, 0);
+	}
+
+	
+
+
+	/* Button size Calculation */
 	private float topButtonSize()
 	{
 		
@@ -65,14 +116,9 @@ public class CanvasResolutionScript : MonoBehaviour {
 		return ((topButtonSize() / 2) + topButtonPadding());
 	}
 
-	/* get dp value return in pixel */
-	private float DPinPixel(int dp)
-	{
-		return dp * (Screen.dpi/160f);
-	}
 
 
-
+	/* Pixel Resolution calculation */
 	public static int DpToPixel(float dp)
      {
          // Convert the dps to pixels
@@ -122,4 +168,11 @@ public class CanvasResolutionScript : MonoBehaviour {
          
          return res;
      }
+
+
+	 /* Unuse grapvyard: get dp value return in pixel */
+	private float DPinPixel(int dp)
+	{
+		return dp * (Screen.dpi/160f);
+	}
 }
