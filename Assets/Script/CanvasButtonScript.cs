@@ -25,7 +25,7 @@ public class CanvasButtonScript : MonoBehaviour {
 
 		backButton = actionBar.gameObject.transform.Find("BackButton").gameObject;
 		searchInputField = actionBar.gameObject.transform.Find("SearchInputField").gameObject;
-		clearButton = searchInputField.transform.Find("ClearSearchButton").gameObject;
+		clearButton = actionBar.gameObject.transform.Find("ClearSearchButton").gameObject;
 		backButton.SetActive(false);
 		searchInputField.SetActive(false);
 		clearButton.SetActive(false);

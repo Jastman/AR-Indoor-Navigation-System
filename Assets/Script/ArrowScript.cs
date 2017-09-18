@@ -4,12 +4,12 @@ using UnityEngine;
 
 public class ArrowScript : MonoBehaviour {
 
-	ImageTargetData targetData;
+	MarkerData targetData;
 
 	// Use this for initialization
 	void Start () {
 		Debug.Log("start");
-		targetData = transform.parent.gameObject.GetComponent<ImageTargetData>();
+		targetData = transform.parent.gameObject.GetComponent<MarkerData>();
 	}
 	
 	// Update is called once per frame
@@ -29,5 +29,16 @@ public class ArrowScript : MonoBehaviour {
 	{
 		transform.rotation = transform.parent.rotation;
 		Debug.Log("To Zero " + transform.rotation.eulerAngles);
+	}
+
+	public void PointToCoordinate(Vector3 destination) /* Get Destination of object to point, return degree and rotate arrow */
+	{	
+		float planeDistance = Vector2.Distance(targetData.position, destination);
+		float deltaX = targetData.position.x - destination.x;
+		float deltaY = targetData.position.z - destination.z;
+		
+		transform.Rotate(0, 0, (Mathf.Atan2(deltaY, deltaX))*180/Mathf.PI );
+		Debug.Log("-- " + targetData.position + " " + destination);
+		Debug.Log("-- Point ToCoorDinate -- " + deltaY + " " + deltaX + " "  + Mathf.Atan2(deltaY, deltaX));
 	}
 }

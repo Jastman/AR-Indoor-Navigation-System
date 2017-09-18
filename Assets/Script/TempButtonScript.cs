@@ -7,11 +7,20 @@ public class TempButtonScript : MonoBehaviour {
 
 	public float zRotateDegree = 0;
 
-	private GameObject arcamera;
+	private GameObject arcamera, destinationPoint;
 
 	// Use this for initialization
 	void Start () {
 		arcamera = GameObject.Find("ARCamera");
+
+		destinationPoint = GameObject.Find("Point");
+		IEnumerable<TrackableBehaviour> trackableList = arcamera.GetComponent<CameraFocusController>().GetActiveTrackable();
+		foreach (TrackableBehaviour tr in trackableList)
+		{
+			tr.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().
+				PointToCoordinate(destinationPoint.GetComponent<MarkerData>().position);
+			Debug.Log(tr.gameObject.name + " Turn Default Position");
+		}
 	}
 	
 	// Update is called once per frame

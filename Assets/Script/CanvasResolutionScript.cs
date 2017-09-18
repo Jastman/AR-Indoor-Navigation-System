@@ -47,7 +47,7 @@ public class CanvasResolutionScript : MonoBehaviour {
 
 		backButton = actionBarImage.gameObject.transform.Find("BackButton").GetComponent<RectTransform>();
 		searchInputField = actionBarImage.gameObject.transform.Find("SearchInputField").GetComponent<RectTransform>();
-		clearButton = searchInputField.gameObject.transform.Find("ClearSearchButton").GetComponent<RectTransform>();
+		clearButton = actionBarImage.gameObject.transform.Find("ClearSearchButton").GetComponent<RectTransform>();
 	}
 	
 	// Update is called once per frame
@@ -88,7 +88,7 @@ public class CanvasResolutionScript : MonoBehaviour {
 	public void SetClearButtonInSearch()
 	{
 		clearButton.sizeDelta = new Vector2(actionBarHeight*0.3f, actionBarHeight*0.3f);
-		clearButton.anchoredPosition = new Vector2((clearButton.sizeDelta.x/2) + (actionBarHeight*0.1f) , 0);
+		clearButton.anchoredPosition = new Vector2(((clearButton.sizeDelta.x/2) + (actionBarHeight*0.1f))*-1 , 0);
 	}
 	public void SetSearchFieldInSearch()
 	{
