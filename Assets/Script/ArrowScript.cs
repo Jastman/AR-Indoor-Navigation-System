@@ -5,10 +5,10 @@ using UnityEngine;
 public class ArrowScript : MonoBehaviour {
 
 	MarkerData targetData;
+	private const int markerXRotation = 270;
 
 	// Use this for initialization
 	void Start () {
-		Debug.Log("start");
 		targetData = transform.parent.gameObject.GetComponent<MarkerData>();
 	}
 	
@@ -37,8 +37,8 @@ public class ArrowScript : MonoBehaviour {
 		float deltaX = targetData.position.x - destination.x;
 		float deltaY = targetData.position.z - destination.z;
 		
-		transform.Rotate(0, 0, (Mathf.Atan2(deltaY, deltaX))*180/Mathf.PI );
+		transform.Rotate(0, 0, (((Mathf.Atan2(deltaY, -deltaX))*180/Mathf.PI) + markerXRotation) + (360-targetData.orientation.y) );
 		Debug.Log("-- " + targetData.position + " " + destination);
-		Debug.Log("-- Point ToCoorDinate -- " + deltaY + " " + deltaX + " "  + Mathf.Atan2(deltaY, deltaX));
+		Debug.Log("-- Point ToCoorDinate -- " + deltaY + " " + deltaX + " "  + (((Mathf.Atan2(deltaY, -deltaX))*180/Mathf.PI) + 270));
 	}
 }
