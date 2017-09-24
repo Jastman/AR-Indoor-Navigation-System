@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
+  <Tracking>
+    <ImageTarget name="TestMarker08" size="1.000000 0.486700" />
+    <ImageTarget name="TestMarker07" size="1.000000 0.585447" />
+    <ImageTarget name="TestMarker06" size="1.000000 0.424121" />
+    <ImageTarget name="TestMarker05" size="1.000000 0.591667" />
+    <ImageTarget name="TestMarker04" size="1.000000 0.401429" />
+    <ImageTarget name="TestMarker03" size="1.000000 1.603865" />
+    <ImageTarget name="TestMarker02" size="1.000000 0.993964" />
+    <ImageTarget name="TestMarker01" size="1.000000 0.483652" />
+  </Tracking>
+</QCARConfig>

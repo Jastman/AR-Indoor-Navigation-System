@@ -44,8 +44,10 @@ MonoBehaviour:
       ContainsMagnet: 0
   databaseLoad:
     dataSetsToLoad:
+    - TestMarkerDB
     - MarkDB
     dataSetsToActivate:
+    - TestMarkerDB
     - MarkDB
   videoBackground:
     clippingMode: 0
