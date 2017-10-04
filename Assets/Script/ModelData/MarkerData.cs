@@ -3,9 +3,11 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MarkerData : MonoBehaviour {
+public class MarkerData : MonoBehaviour, ICloneable {
 
 	[Header("Marker Data")]
+	public Vector3 position = Vector3.zero;
+	public Vector3 orientation = Vector3.zero;
 	public string floor = "0";
 	public string markerName = "";
 	public string description = "";
@@ -13,11 +15,9 @@ public class MarkerData : MonoBehaviour {
 
 	[Header("Vertex Data")]
 	public float cost = Single.PositiveInfinity;
-	public List<MarkerData> neighborList;
-	public bool isReach;
-	public bool isCurrent;
-	public MarkerData predecessor = null;
-	public MarkerData successor = null;
+	public List<GameObject> adjacentNodeList;
+	public GameObject predecessor = null;
+	public GameObject successor = null;
 
 	public enum NodeType
 	{
@@ -29,8 +29,7 @@ public class MarkerData : MonoBehaviour {
 
 	public NodeType nodeType = NodeType.None;
 
-	public Vector3 position = Vector3.zero;
-	public Vector3 orientation = Vector3.zero;
+
 
 	// Use this for initialization
 	void Start () {
@@ -44,6 +43,9 @@ public class MarkerData : MonoBehaviour {
 	void Update () {
 		
 	}
+
+	/* deep clone */
+	
 
 	/* Set room data from someWhere */
 	public void SetRoomData(string name, string des)
@@ -69,5 +71,24 @@ public class MarkerData : MonoBehaviour {
 	{
 		return nodeType == NodeType.None;
 	}
-	#endregion
+    #endregion
+
+	public object Clone()
+    {
+		MarkerData markerDataClone = new MarkerData();
+		markerDataClone.position = this.position ;
+		markerDataClone.orientation = this.orientation ;
+		markerDataClone.floor = this.floor;
+		markerDataClone.markerName = this.markerName;
+		markerDataClone.description = this.description ;
+		markerDataClone.roomName = this.roomName ;
+		
+		markerDataClone.cost = this.cost ;
+		markerDataClone.adjacentNodeList = this.adjacentNodeList ;
+		markerDataClone.predecessor = this.predecessor ;
+		markerDataClone.successor = this.successor ;
+		markerDataClone.nodeType = this.nodeType ;
+		
+		return markerDataClone;
+    }
 }

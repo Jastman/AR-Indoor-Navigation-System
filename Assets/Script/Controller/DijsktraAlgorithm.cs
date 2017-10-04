@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class DijsktraAlgorithm : MonoBehaviour {
@@ -17,67 +18,113 @@ public class DijsktraAlgorithm : MonoBehaviour {
 		
 	}
 
-	public bool FindShortestPath(FloorData floorData, MarkerData startNode, MarkerData finishNode)
+	public bool FindShortestPath(GameObject floorObject, GameObject startNode, GameObject finishNode)
 	{
-		MarkerData currentNode = startNode;
-		startNode.isCurrent = true;
-		startNode.isReach = true;
-		foreach (MarkerData markerData in floorData.markerList)
+		//List<string> unVisitedList = floorData.markerList.Select(x=>x.markerName).ToList(); //copy marker name list
+		//List<MarkerData> unVisitedList = floorData.markerList.ConvertAll(node => node.Clone() as MarkerData);  //<< deep clone it
+		FloorData currentFloor = floorObject.GetComponent<FloorData>();
+		
+		//List<MarkerData> unVisitedList = floorObject.GetComponent<FloorData>().markerList.ToList(); //---
+		List<GameObject> unVisitedList = floorObject.GetComponent<FloorData>().markerList.ToList(); //---
+		
+		bool isFounded = false;
+		float costToadjacentNode = 0;
+		GameObject currentNode = startNode;
+		MarkerData currentMarkerData = currentNode.GetComponent<MarkerData>();
+		currentMarkerData.cost = 0;
+
+		//Debug.Log(" ///"+unVisitedList[1].Equals(adjacentNode));
+		
+		Debug.Log(" - - - - " + (unVisitedList.Count > 0));
+		while(currentNode != finishNode && (unVisitedList.Count>=0) ) //unVisitedList.Count.CompareTo(0)  ||  (unvisitedLeft > 0)   
 		{
-			if(markerData.isCurrent)
+			
+			//check adjacentNode
+			foreach (GameObject adjacentObject in currentMarkerData.adjacentNodeList)
 			{
-				currentNode = markerData;
+				MarkerData adjacentMarkerData = adjacentObject.GetComponent<MarkerData>();
+				Debug.Log(" -@ " + currentMarkerData.markerName +"  -Adjacent |" + adjacentMarkerData.markerName + "| End at " +finishNode.GetComponent<MarkerData>().markerName);
+				
+				bool test = (adjacentMarkerData.markerName == finishNode.GetComponent<MarkerData>().markerName);
+				Debug.Log(" Is end:" + test);
+				if(adjacentObject == finishNode) { // if adjacent is final node
+					adjacentMarkerData.cost = Vector3.Distance(currentMarkerData.position, adjacentMarkerData.position) + currentMarkerData.cost;
+					unVisitedList.Remove(currentNode);
+					unVisitedList.Remove(adjacentObject);
+					adjacentMarkerData.predecessor = currentNode;
+					currentNode = adjacentObject;
+					currentMarkerData = currentNode.GetComponent<MarkerData>();
+					isFounded = true;
+					Debug.Log(" - - Break - -");
+					break;
+				} else if (unVisitedList.Contains(adjacentObject) ) { //neightbor are not visited, Update it
+					costToadjacentNode = Vector3.Distance(currentNode.GetComponent<MarkerData>().position, adjacentMarkerData.position) + currentNode.GetComponent<MarkerData>().cost;
+					adjacentMarkerData.cost = costToadjacentNode < adjacentMarkerData.cost ? costToadjacentNode : adjacentMarkerData.cost;
+					adjacentMarkerData.predecessor = costToadjacentNode < adjacentMarkerData.cost ? currentNode : adjacentMarkerData.predecessor;
+					Debug.Log("  Update "+ adjacentMarkerData.markerName+ "  to " +adjacentMarkerData.cost);
+				}
 			}
-			else if(!markerData.isReach)
+			if(isFounded){break;}
+
+			// find Least cost  and choose to current node
+			GameObject leastCostNode = finishNode;
+			foreach (GameObject unVisitedObj in unVisitedList)
 			{
-				Debug.Log("Reached node:" + markerData.markerName + " ");
-				if(markerData.markerName == startNode.markerName)
+				MarkerData unVisitedNode = unVisitedObj.GetComponent<MarkerData>();
+				if(unVisitedNode.cost < leastCostNode.GetComponent<MarkerData>().cost && unVisitedObj != currentNode)
 				{
-					markerData.cost = 0;
-					markerData.isReach = true;
-					markerData.isCurrent = true;
+					leastCostNode = unVisitedObj;
 				}
-				/* check neighbor and update */
-				foreach (MarkerData connectedNode in currentNode.neighborList)
-				{
-					float costFromThisNode = markerData.cost + Vector3.Distance(markerData.position, connectedNode.position);
-					if(costFromThisNode < connectedNode.cost)
-					{
-						connectedNode.cost = costFromThisNode;
-						connectedNode.predecessor = markerData;
-						Debug.Log("  Update " + connectedNode.name +" to" + connectedNode.cost);
-					}
-				}
+				Debug.Log("Compare "+unVisitedNode.markerName+"-  "+unVisitedNode.cost+"<"+leastCostNode.GetComponent<MarkerData>().cost 
+					+"  Least cost are:" + leastCostNode.GetComponent<MarkerData>().markerName + " cost:" + leastCostNode.GetComponent<MarkerData>().cost);
 			}
-			else{
-				Debug.Log("Skipped node:" + markerData.markerName);
-			}
+			unVisitedList.Remove(currentNode);
+			leastCostNode.GetComponent<MarkerData>().predecessor = currentNode;
+			currentNode = leastCostNode;
+			currentMarkerData = currentNode.GetComponent<MarkerData>();
+			Debug.Log(" =====" +" Unvisited left " + unVisitedList.Count + " >=0 is " + (unVisitedList.Count>=0));
+			Debug.Log("===== CurrentNode are " + currentNode.GetComponent<MarkerData>().markerName );
 			
 		}
 
-		/* choose shortest node to current node */
-		MarkerData choosenNode = floorData.markerList[0];
-		foreach (MarkerData markerData in floorData.markerList)
+		foreach (GameObject prnode in floorObject.GetComponent<FloorData>().markerList)
 		{
-			if(!markerData.isReach && choosenNode.cost > markerData.cost) //and not in dead node
-			{
-				choosenNode = markerData;
-				markerData.isReach = true;
-				markerData.isCurrent = true;
-			}
+			Debug.Log("CheckCost " + prnode.name+" " +prnode.GetComponent<MarkerData>().cost + " " );
 		}
-		return true;
+
+		/* set successor from reverse finishNode's preDecessor */
+		currentNode = finishNode;
+		while (currentNode != startNode)
+		{
+			currentNode.GetComponent<MarkerData>().predecessor.GetComponent<MarkerData>().successor = currentNode;
+			currentNode = currentNode.GetComponent<MarkerData>().predecessor;
+		}
+
+		return isFounded;
 	}
 
-	public void ResetVertexData(FloorData floorData)
+	private GameObject FindGameObjectFromMarkerData(GameObject floorObject, MarkerData markerData)
 	{
-		foreach (MarkerData markerData in floorData.markerList)
+		foreach (GameObject markerob in floorObject.GetComponent<FloorData>().markerList)
 		{
+			if(markerob.GetComponent<MarkerData>().markerName == markerData.markerName)
+			{
+				return markerob;
+			}
+		}
+		return floorObject.GetComponent<FloorData>().markerList[0].gameObject;
+	}
+
+	public void ResetAllVertexData(FloorData floorData)
+	{
+		foreach (GameObject markerObj in floorData.markerList)
+		{
+			MarkerData markerData = markerObj.GetComponent<MarkerData>();
 			markerData.cost = Single.PositiveInfinity;
-			markerData.isReach = false;
-			markerData.isCurrent = false;
 			markerData.predecessor = null;
 			markerData.successor = null;
 		}
 	}
+
+
 }
