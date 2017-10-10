@@ -61,7 +61,9 @@ public class DijsktraAlgorithm : MonoBehaviour {
 					costToadjacentNode = Vector3.Distance(currentNode.GetComponent<MarkerData>().position, adjacentMarkerData.position) + currentNode.GetComponent<MarkerData>().cost;
 					adjacentMarkerData.cost = costToadjacentNode < adjacentMarkerData.cost ? costToadjacentNode : adjacentMarkerData.cost;
 					adjacentMarkerData.predecessor = costToadjacentNode < adjacentMarkerData.cost ? currentNode : adjacentMarkerData.predecessor;
-					Debug.Log("  Update "+ adjacentMarkerData.markerName+ "  to " +adjacentMarkerData.cost);
+					Debug.Log("  Update "+ adjacentMarkerData.markerName+ "  to " + adjacentMarkerData.cost );
+						if(adjacentMarkerData.predecessor.GetComponent<MarkerData>() != null) 
+						{Debug.Log(" from "+ adjacentMarkerData.predecessor.name);}
 				}
 			}
 			if(isFounded){break;}
@@ -79,6 +81,8 @@ public class DijsktraAlgorithm : MonoBehaviour {
 					+"  Least cost are:" + leastCostNode.GetComponent<MarkerData>().markerName + " cost:" + leastCostNode.GetComponent<MarkerData>().cost);
 			}
 			unVisitedList.Remove(currentNode);
+			Debug.Log("change predecessor of leastcostnode|" +leastCostNode.GetComponent<MarkerData>().markerName+
+				 "| form " + leastCostNode.GetComponent<MarkerData>().predecessor + " To " + currentNode);
 			leastCostNode.GetComponent<MarkerData>().predecessor = currentNode;
 			currentNode = leastCostNode;
 			currentMarkerData = currentNode.GetComponent<MarkerData>();

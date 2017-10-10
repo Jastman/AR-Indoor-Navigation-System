@@ -7,10 +7,18 @@ public class CanvasButtonScript : MonoBehaviour {
 
 	public GameObject actionBar;
 
-	public GameObject searchPanel; //panel
+	public GameObject searchPanel, mapPanel; //panel
 	private GameObject hambergerButton, mapButton, searchButton, backButton, clearButton; //button
 	private GameObject searchInputField, appName; //InputFields + text
 	private Text appNameText;
+
+	private enum Page
+	{
+		Main,
+		Search,
+		Map
+	}
+	private Page page = Page.Main;
 
 	private CanvasResolutionScript canvasResolutionScript;
 
@@ -36,8 +44,20 @@ public class CanvasButtonScript : MonoBehaviour {
 		
 	}
 
+	public void OnBackButton()
+	{
+		switch (page)
+		{
+			case Page.Search: OnCloseSerch(); break;
+			case Page.Map: OnCloseMap(); break;
+			default: OnCloseSerch(); break;
+		}
+	}
+
 	public void OnOpenSerch()
 	{
+		page = Page.Search;
+		mapPanel.SetActive(false);
 		searchPanel.SetActive(true);
 		hambergerButton.SetActive(false);
 		mapButton.SetActive(false);
@@ -55,6 +75,51 @@ public class CanvasButtonScript : MonoBehaviour {
 
 	public void OnCloseSerch()
 	{
+		page = Page.Main;
+		mapPanel.SetActive(false);
+		searchPanel.SetActive(false);
+		hambergerButton.SetActive(true);
+		mapButton.SetActive(true);
+		searchButton.SetActive(true);
+		appName.SetActive(true);
+
+		backButton.SetActive(false);
+		searchInputField.SetActive(false);
+		clearButton.SetActive(false);
+
+		canvasResolutionScript.SetHambergerButtonInMain();
+		canvasResolutionScript.SetMapButtonInMain();
+		canvasResolutionScript.SetSearchButtonInMain();
+		canvasResolutionScript.SetAppNameInMain();
+
+		canvasResolutionScript.SetSeHelpTextInSearch();
+	}
+
+	public void OnOpenMap()
+	{
+		page = Page.Map;
+		mapPanel.SetActive(true);
+		searchPanel.SetActive(false);
+		hambergerButton.SetActive(false);
+		mapButton.SetActive(false);
+		searchButton.SetActive(false);
+		appName.SetActive(true);
+
+		backButton.SetActive(true);
+		searchInputField.SetActive(false);
+		clearButton.SetActive(false);
+
+		canvasResolutionScript.SetAppNameInMap();
+		canvasResolutionScript.SetAppNameInMap();
+
+		canvasResolutionScript.SetMapImageInMap();
+		canvasResolutionScript.SetArrowButtonInMap();
+	}
+
+	public void OnCloseMap()
+	{
+		page = Page.Main;
+		mapPanel.SetActive(false);
 		searchPanel.SetActive(false);
 		hambergerButton.SetActive(true);
 		mapButton.SetActive(true);
