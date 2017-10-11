@@ -5,12 +5,12 @@ using UnityEngine;
 public class FloorData : MonoBehaviour {
 
 	public List<GameObject> markerList;
-	public string floor = "0";
+	public string floorName = "0";
 
 	// Use this for initialization
 	void Start () {
 		/* Work after All Marker Data get their position */
-		floor = gameObject.name.Replace("Floor","");
+		floorName = gameObject.name.Replace("Floor","");
 		foreach (Transform childTransform in transform)
 		{
 			GameObject objToAdd = childTransform.gameObject;
@@ -18,10 +18,9 @@ public class FloorData : MonoBehaviour {
 			{
 				Debug.Log("Get Marker " + objToAdd.GetComponent<MarkerData>().markerName 
 					+ ": " +objToAdd.GetComponent<MarkerData>().position);
-				objToAdd.GetComponent<MarkerData>().floor = floor;
+				objToAdd.GetComponent<MarkerData>().floor = floorName;
 				markerList.Add(objToAdd);
 			}
-			
 		}
 	}
 	

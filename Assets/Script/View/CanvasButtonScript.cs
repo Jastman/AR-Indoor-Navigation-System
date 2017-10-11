@@ -12,6 +12,12 @@ public class CanvasButtonScript : MonoBehaviour {
 	private GameObject searchInputField, appName; //InputFields + text
 	private Text appNameText;
 
+	private GameObject searchHelpText, searchList;
+	private GameObject mapImage, rightButton, leftButton;
+
+	private FloorData showingFloor;
+	private BuidingData building;
+
 	private enum Page
 	{
 		Main,
@@ -24,6 +30,9 @@ public class CanvasButtonScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		building = GameObject.Find("IT Buiding").GetComponent<BuidingData>();
+		showingFloor = building.floorList[0].GetComponent<FloorData>();
+
 		canvasResolutionScript = gameObject.GetComponent<CanvasResolutionScript>();
 		hambergerButton = actionBar.gameObject.transform.Find("HambergerButton").gameObject;
 		mapButton = actionBar.gameObject.transform.Find("MapButton").gameObject;		
@@ -34,6 +43,16 @@ public class CanvasButtonScript : MonoBehaviour {
 		backButton = actionBar.gameObject.transform.Find("BackButton").gameObject;
 		searchInputField = actionBar.gameObject.transform.Find("SearchInputField").gameObject;
 		clearButton = actionBar.gameObject.transform.Find("ClearSearchButton").gameObject;
+
+		/* search */
+		searchHelpText = searchPanel.transform.Find("HelpText").gameObject;
+		searchList = searchPanel.transform.Find("Scroll View").gameObject;
+
+		/* map */
+		mapImage = mapPanel.transform.Find("MapImage").gameObject;
+		rightButton = mapPanel.transform.Find("RightButton").gameObject;
+		leftButton = mapPanel.transform.Find("LeftButton").gameObject;
+
 		backButton.SetActive(false);
 		searchInputField.SetActive(false);
 		clearButton.SetActive(false);
@@ -71,6 +90,8 @@ public class CanvasButtonScript : MonoBehaviour {
 		canvasResolutionScript.SetBackButtonInSearch();
 		canvasResolutionScript.SetClearButtonInSearch();
 		canvasResolutionScript.SetSearchFieldInSearch();
+
+		canvasResolutionScript.SetHelpTextInSearch();
 	}
 
 	public void OnCloseSerch()
@@ -91,8 +112,6 @@ public class CanvasButtonScript : MonoBehaviour {
 		canvasResolutionScript.SetMapButtonInMain();
 		canvasResolutionScript.SetSearchButtonInMain();
 		canvasResolutionScript.SetAppNameInMain();
-
-		canvasResolutionScript.SetSeHelpTextInSearch();
 	}
 
 	public void OnOpenMap()
@@ -134,5 +153,27 @@ public class CanvasButtonScript : MonoBehaviour {
 		canvasResolutionScript.SetMapButtonInMain();
 		canvasResolutionScript.SetSearchButtonInMain();
 		canvasResolutionScript.SetAppNameInMain();
+	}
+
+	public void OnShiftMap(bool isForward)
+	{
+		GameObject floorObject;
+		//check current floor
+		if (MainStaticData.floor != null) {
+			showingFloor = MainStaticData.floor.GetComponent<FloorData>();
+		}
+
+		//get next floor from buildingData
+		floorObject = isForward ? building.GetNextFloor(showingFloor.floorName) : building.GetNextFloor(showingFloor.floorName);
+
+		// get material from first child of floorData 
+		Material floorMaterial = floorObject.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>().materials[0];
+		mapImage.GetComponent<Image>().material = floorMaterial;
+		showingFloor = floorObject.GetComponent<FloorData>();
+	}
+
+	public void ShowMarkerOfFloor(GameObject Floor)
+	{
+		
 	}
 }

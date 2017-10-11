@@ -53,8 +53,8 @@ public class CanvasResolutionScript : MonoBehaviour {
 		clearButton = actionBarImage.gameObject.transform.Find("ClearSearchButton").GetComponent<RectTransform>();
 
 		/* search */
-		searchHelpText = searchInputField.transform.Find("HelpText").GetComponent<RectTransform>();
-		searchList = searchInputField.transform.Find("Scroll View").GetComponent<RectTransform>();
+		searchHelpText = searchPanel.transform.Find("HelpText").GetComponent<RectTransform>();
+		searchList = searchPanel.transform.Find("Scroll View").GetComponent<RectTransform>();
 
 		/* map */
 		mapImage = mapPanel.transform.Find("MapImage").GetComponent<RectTransform>();
@@ -110,11 +110,11 @@ public class CanvasResolutionScript : MonoBehaviour {
 		searchInputField.sizeDelta = new Vector2(Screen.width - actionBarHeight - (actionBarHeight*0.5f), topButtonSize());
 		searchInputField.anchoredPosition = new Vector2(searchInputField.sizeDelta.x/2 + actionBarHeight, 0);
 	}
-	public void SetSeHelpTextInSearch()
+	public void SetHelpTextInSearch()
 	{
-		float helpTextPadding = 50f;
+		float helpTextPadding = 20f;
 		searchHelpText.sizeDelta = new Vector2(Screen.width - helpTextPadding, 50); //<< 50
-		searchHelpText.anchoredPosition = new Vector2(0, actionBarHeight + helpTextPadding + searchHelpText.sizeDelta.y);
+		searchHelpText.anchoredPosition = new Vector2(0, -1*(actionBarHeight + (helpTextPadding/2) + (searchHelpText.sizeDelta.y/2)));
 	}
 	#endregion
 
