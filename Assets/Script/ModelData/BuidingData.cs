@@ -32,7 +32,7 @@ public class BuidingData : MonoBehaviour {
 		for (int i = 0; i < floorList.Count; i++)
 		{
 			FloorData fl = floorList[i].GetComponent<FloorData>();
-			if (floorName == fl.floorName && i == floorList.Count-1) { 	// last index return first
+			if (floorName == fl.floorName && i >= floorList.Count-1) { 	// last index return first
 				return floorList[0]; 
 			} else if (floorName == fl.floorName) { 					//name ard equal return next index
 				return floorList[i+1];
@@ -43,12 +43,13 @@ public class BuidingData : MonoBehaviour {
 
 	public GameObject GetPreviousFloor(string floorName)
 	{
-		for (int i = 0; i < floorList.Count; i++)
+		for (int i = floorList.Count-1; i >= 0; i--)
 		{
 			FloorData fl = floorList[i].GetComponent<FloorData>();
-			if (floorName == fl.floorName && i == 0) { 			// first index retuen last
-				return floorList[floorList.Count]; 
-			} else if (floorName == fl.floorName) { 			//name are equal return previous index
+			if (floorName == fl.floorName && i <= 0) {
+				return floorList[floorList.Count-1];
+			} else if (floorName == fl.floorName) { 					//name ard equal return previous index
+				
 				return floorList[i-1];
 			}
 		}

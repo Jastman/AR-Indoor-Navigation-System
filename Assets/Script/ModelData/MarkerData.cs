@@ -33,7 +33,7 @@ public class MarkerData : MonoBehaviour, ICloneable {
 
 	// Use this for initialization
 	void Start () {
-		position = transform.position;
+		position = transform.localPosition;
 		orientation = transform.rotation.eulerAngles;
 		Debug.Log("Start " + gameObject.name + " " +position);
 		markerName = gameObject.name.Replace("ImageTarget ","");

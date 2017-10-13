@@ -5,8 +5,8 @@ using UnityEngine.UI;
 
 public class CanvasButtonScript : MonoBehaviour {
 
+	public GameObject markerPrefab;
 	public GameObject actionBar;
-
 	public GameObject searchPanel, mapPanel; //panel
 	private GameObject hambergerButton, mapButton, searchButton, backButton, clearButton; //button
 	private GameObject searchInputField, appName; //InputFields + text
@@ -164,16 +164,38 @@ public class CanvasButtonScript : MonoBehaviour {
 		}
 
 		//get next floor from buildingData
-		floorObject = isForward ? building.GetNextFloor(showingFloor.floorName) : building.GetNextFloor(showingFloor.floorName);
+		floorObject = isForward ? building.GetNextFloor(showingFloor.floorName) : building.GetPreviousFloor(showingFloor.floorName);
 
 		// get material from first child of floorData 
 		Material floorMaterial = floorObject.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>().materials[0];
 		mapImage.GetComponent<Image>().material = floorMaterial;
+		ShowMarkerOfFloor(floorObject);
 		showingFloor = floorObject.GetComponent<FloorData>();
 	}
 
-	public void ShowMarkerOfFloor(GameObject Floor)
+	public void ShowMarkerOfFloor(GameObject floorObject)
 	{
+		GameObject markers = mapImage.transform.GetChild(0).gameObject;
+		//destroy all marker
+		foreach (Transform ch in markers.transform)
+		{
+			Destroy(ch.gameObject);
+		}
+		//create marker prefab
+		List<GameObject> markerList = floorObject.GetComponent<FloorData>().markerList;
+		foreach (GameObject markerob in markerList)
+		{
+			//instantiate marker at child of Markers
+			GameObject markerDot = Instantiate(markerPrefab);
+			MarkerData markerdata = markerob.GetComponent<MarkerData>();
+			markerDot.transform.SetParent(markers.transform);
+			//recttransform coordinate xy 1000/mapimage.sizedelta
+			markerDot.GetComponent<RectTransform>().anchoredPosition = new Vector2(
+				markerdata.position.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x/1000),
+				markerdata.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y/1000)
+			);
+		}
+		
 		
 	}
 }

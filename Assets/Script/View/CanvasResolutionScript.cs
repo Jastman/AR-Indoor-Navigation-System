@@ -25,6 +25,8 @@ public class CanvasResolutionScript : MonoBehaviour {
 
 	private RectTransform searchHelpText, searchList;
 	private RectTransform mapImage, rightButton, leftButton;
+
+	private List<GameObject> markerList; //not use now
 	
 
 	// Use this for initialization
@@ -141,6 +143,13 @@ public class CanvasResolutionScript : MonoBehaviour {
 		rightButton.anchoredPosition = new Vector2(Screen.width/3.5f, Screen.height/-2.5f);
 		leftButton.sizeDelta = new Vector2(actionBarHeight*1.3f, actionBarHeight*1.3f);
 		leftButton.anchoredPosition = new Vector2(Screen.width/-3.5f, Screen.height/-2.5f);
+	}
+	#endregion
+
+	#region MapMarker
+	private void GetMarker()
+	{
+		//if no one active, instancetiate one
 	}
 	#endregion
 	
