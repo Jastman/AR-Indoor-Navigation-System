@@ -46,7 +46,6 @@ public class DijsktraAlgorithm : MonoBehaviour {
 				Debug.Log(" -@ " + currentMarkerData.markerName +"  -Adjacent |" + adjacentMarkerData.markerName + "| End at " +finishNode.GetComponent<MarkerData>().markerName);
 				
 				bool test = (adjacentMarkerData.markerName == finishNode.GetComponent<MarkerData>().markerName);
-				Debug.Log(" Is end:" + test);
 				if(adjacentObject == finishNode) { // if adjacent is final node
 					adjacentMarkerData.cost = Vector3.Distance(currentMarkerData.position, adjacentMarkerData.position) + currentMarkerData.cost;
 					unVisitedList.Remove(currentNode);
@@ -59,11 +58,15 @@ public class DijsktraAlgorithm : MonoBehaviour {
 					break;
 				} else if (unVisitedList.Contains(adjacentObject) ) { //neightbor are not visited, Update it
 					costToadjacentNode = Vector3.Distance(currentNode.GetComponent<MarkerData>().position, adjacentMarkerData.position) + currentNode.GetComponent<MarkerData>().cost;
-					adjacentMarkerData.cost = costToadjacentNode < adjacentMarkerData.cost ? costToadjacentNode : adjacentMarkerData.cost;
-					adjacentMarkerData.predecessor = costToadjacentNode < adjacentMarkerData.cost ? currentNode : adjacentMarkerData.predecessor;
+					if (costToadjacentNode < adjacentMarkerData.cost) 
+					{
+						Debug.Log("cost from here are less than older " + costToadjacentNode + "<" + adjacentMarkerData.cost);
+						adjacentMarkerData.cost = costToadjacentNode;
+						adjacentMarkerData.predecessor = currentNode;
+						Debug.Log("Predecessor of "+adjacentMarkerData.GetComponent<MarkerData>().markerName+ " are " + adjacentMarkerData.predecessor.GetComponent<MarkerData>().markerName);
+					}
+					
 					Debug.Log("  Update "+ adjacentMarkerData.markerName+ "  to " + adjacentMarkerData.cost );
-						if(adjacentMarkerData.predecessor.GetComponent<MarkerData>() != null) 
-						{Debug.Log(" from "+ adjacentMarkerData.predecessor.name);}
 				}
 			}
 			if(isFounded){break;}
@@ -83,7 +86,6 @@ public class DijsktraAlgorithm : MonoBehaviour {
 			unVisitedList.Remove(currentNode);
 			Debug.Log("change predecessor of leastcostnode|" +leastCostNode.GetComponent<MarkerData>().markerName+
 				 "| form " + leastCostNode.GetComponent<MarkerData>().predecessor + " To " + currentNode);
-			leastCostNode.GetComponent<MarkerData>().predecessor = currentNode;
 			currentNode = leastCostNode;
 			currentMarkerData = currentNode.GetComponent<MarkerData>();
 			Debug.Log(" =====" +" Unvisited left " + unVisitedList.Count + " >=0 is " + (unVisitedList.Count>=0));
@@ -98,11 +100,14 @@ public class DijsktraAlgorithm : MonoBehaviour {
 
 		/* set successor from reverse finishNode's preDecessor */
 		currentNode = finishNode;
+		Debug.Log(" Path are: " + finishNode.GetComponent<MarkerData>().markerName);
 		while (currentNode != startNode)
 		{
 			currentNode.GetComponent<MarkerData>().predecessor.GetComponent<MarkerData>().successor = currentNode;
 			currentNode = currentNode.GetComponent<MarkerData>().predecessor;
+			Debug.Log(currentNode.GetComponent<MarkerData>().markerName);
 		}
+		Debug.Log(" Path are: " + startNode.GetComponent<MarkerData>().markerName);
 
 		return isFounded;
 	}
