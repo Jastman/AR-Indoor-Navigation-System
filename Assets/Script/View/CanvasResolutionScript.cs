@@ -23,7 +23,8 @@ public class CanvasResolutionScript : MonoBehaviour {
 	private RectTransform actionBarRect, searchInputField, appName;
 	private RectTransform mapButton, searchButton, hambergerButton, backButton, clearButton;
 
-	private RectTransform searchHelpText, searchList;
+	private RectTransform searchHelpText, searchList, viewPort, scrollbar;
+	private GridLayoutGroup searchContent;
 	private RectTransform mapImage, rightButton, leftButton;
 
 	private List<GameObject> markerList; //not use now
@@ -57,6 +58,9 @@ public class CanvasResolutionScript : MonoBehaviour {
 		/* search */
 		searchHelpText = searchPanel.transform.Find("HelpText").GetComponent<RectTransform>();
 		searchList = searchPanel.transform.Find("Scroll View").GetComponent<RectTransform>();
+		viewPort = searchList.gameObject.transform.Find("Viewport").GetComponent<RectTransform>();
+		scrollbar = searchList.gameObject.transform.Find("Scrollbar Vertical").GetComponent<RectTransform>();
+		searchContent = viewPort.gameObject.transform.Find("Content").gameObject.GetComponent<GridLayoutGroup>();
 
 		/* map */
 		mapImage = mapPanel.transform.Find("MapImage").GetComponent<RectTransform>();
@@ -111,12 +115,32 @@ public class CanvasResolutionScript : MonoBehaviour {
 	{
 		searchInputField.sizeDelta = new Vector2(Screen.width - actionBarHeight - (actionBarHeight*0.5f), topButtonSize());
 		searchInputField.anchoredPosition = new Vector2(searchInputField.sizeDelta.x/2 + actionBarHeight, 0);
+		foreach (Text tx in GetComponentsInChildren<Text>())
+		{
+			tx.fontSize = GetScaledFontSize(48);
+		}
 	}
 	public void SetHelpTextInSearch()
 	{
 		float helpTextPadding = 20f;
 		searchHelpText.sizeDelta = new Vector2(Screen.width - helpTextPadding, 50); //<< 50
-		searchHelpText.anchoredPosition = new Vector2(0, -1*(actionBarHeight + (helpTextPadding/2) + (searchHelpText.sizeDelta.y/2)));
+		searchHelpText.anchoredPosition = new Vector2(0, -1*(actionBarHeight + (helpTextPadding/2f) + (searchHelpText.sizeDelta.y/2f)));
+	}
+	public void SetScrollListInSearch()
+	{
+		float scrollbarPadding = 20f;
+		Debug.Log("scrollbar set");
+		searchList.sizeDelta = new Vector2(
+			Screen.width - scrollbarPadding, 
+			Screen.height - actionBarHeight - searchHelpText.sizeDelta.y - scrollbarPadding
+			);
+		searchList.anchoredPosition = new Vector2(0, -1f*(searchList.sizeDelta.y/2 + actionBarHeight 
+			+ searchHelpText.sizeDelta.y + (scrollbarPadding/2)));
+	}
+	public void SetContentInSearch()
+	{
+		searchContent.cellSize = new Vector2(searchList.sizeDelta.x - actionBarHeight, actionBarHeight/1.5f);
+		searchContent.spacing = new Vector2(actionBarHeight/5f, actionBarHeight/5f);
 	}
 	#endregion
 
@@ -225,6 +249,13 @@ public class CanvasResolutionScript : MonoBehaviour {
          
          return res;
      }
+
+	public int GetScaledFontSize (int baseFontSize) {
+		int uiBaseScreenHeight = 720;
+		float uiScale = Screen.height / uiBaseScreenHeight;
+		int scaledFontSize = Mathf.RoundToInt(baseFontSize * uiScale);
+		return scaledFontSize;
+	}
 
 
 	 /* Unuse grapvyard: get dp value return in pixel */

@@ -5,18 +5,20 @@ using UnityEngine.UI;
 
 public class CanvasButtonScript : MonoBehaviour {
 
-	public GameObject markerPrefab;
+	public GameObject markerPrefab, roomButtonPrefab;
 	public GameObject actionBar;
 	public GameObject searchPanel, mapPanel; //panel
 	private GameObject hambergerButton, mapButton, searchButton, backButton, clearButton; //button
 	private GameObject searchInputField, appName; //InputFields + text
 	private Text appNameText;
 
-	private GameObject searchHelpText, searchList;
+	private GameObject searchHelpText, searchList, viewPort, scrollbar, searchContent;
 	private GameObject mapImage, rightButton, leftButton;
 
-	private FloorData showingFloor;
 	private BuidingData building;
+	private FloorData showingFloor;
+	private List<GameObject> searchShowList;
+
 
 	private enum Page
 	{
@@ -32,6 +34,7 @@ public class CanvasButtonScript : MonoBehaviour {
 	void Start () {
 		building = GameObject.Find("IT Buiding").GetComponent<BuidingData>();
 		showingFloor = building.floorList[0].GetComponent<FloorData>();
+		searchShowList = new List<GameObject>();
 
 		canvasResolutionScript = gameObject.GetComponent<CanvasResolutionScript>();
 		hambergerButton = actionBar.gameObject.transform.Find("HambergerButton").gameObject;
@@ -47,6 +50,9 @@ public class CanvasButtonScript : MonoBehaviour {
 		/* search */
 		searchHelpText = searchPanel.transform.Find("HelpText").gameObject;
 		searchList = searchPanel.transform.Find("Scroll View").gameObject;
+		viewPort = searchList.gameObject.transform.Find("Viewport").gameObject;
+		scrollbar = searchList.gameObject.transform.Find("Scrollbar Vertical").gameObject;
+		searchContent = viewPort.gameObject.transform.Find("Content").gameObject;
 
 		/* map */
 		mapImage = mapPanel.transform.Find("MapImage").gameObject;
@@ -92,6 +98,9 @@ public class CanvasButtonScript : MonoBehaviour {
 		canvasResolutionScript.SetSearchFieldInSearch();
 
 		canvasResolutionScript.SetHelpTextInSearch();
+		canvasResolutionScript.SetScrollListInSearch();
+		canvasResolutionScript.SetContentInSearch();
+		OnTyping();
 	}
 
 	public void OnCloseSerch()
@@ -153,6 +162,47 @@ public class CanvasButtonScript : MonoBehaviour {
 		canvasResolutionScript.SetMapButtonInMain();
 		canvasResolutionScript.SetSearchButtonInMain();
 		canvasResolutionScript.SetAppNameInMain();
+	}
+
+	public void OnTyping()
+	{
+		string typingWord = searchInputField.GetComponent<InputField>().text;
+		searchShowList.Clear();
+		foreach (GameObject floor in building.floorList)
+		{
+			foreach (GameObject marker in floor.GetComponent<FloorData>().markerList)
+			{
+				MarkerData markerData = marker.GetComponent<MarkerData>();
+				if(typingWord == "") {
+					Debug.Log(typingWord +" In " + markerData.roomName);
+					searchShowList.Add(marker);	
+				} else if (markerData.roomName.Contains(typingWord)) {
+					Debug.Log(typingWord +" In " + markerData.roomName);
+					searchShowList.Add(marker);
+				}
+			}
+		}
+		ShowAllRoomOf(searchShowList);
+	}
+
+	private void ShowAllRoomOf(List<GameObject> searchMarkerList)
+	{
+		//destroy all list
+		Debug.Log(searchContent.transform.childCount);
+		foreach (Transform ch in searchContent.transform)
+		{
+			Debug.Log("Destroy" + ch);
+			Destroy(ch.gameObject);
+		}
+		foreach (GameObject markerob in searchMarkerList)
+		{
+			GameObject roomButton = Instantiate(roomButtonPrefab);
+			MarkerData markerdata = markerob.GetComponent<MarkerData>();
+			roomButton.transform.SetParent(searchContent.transform);
+			Text roomButtonText = roomButton.transform.GetChild(0).gameObject.GetComponent<Text>();
+			roomButtonText.text = markerdata.roomName;
+			roomButtonText.fontSize = canvasResolutionScript.GetScaledFontSize(45);
+		}
 	}
 
 	public void OnShiftMap(bool isForward)

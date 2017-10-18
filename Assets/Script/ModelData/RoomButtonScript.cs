@@ -2,10 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class MainController : MonoBehaviour {
-
-	public FloorData beginfloor = null, destfloor = null;
-	public MarkerData beginmarker = null, destmarker = null;
+public class RoomButtonScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
