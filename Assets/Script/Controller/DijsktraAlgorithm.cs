@@ -20,12 +20,10 @@ public class DijsktraAlgorithm : MonoBehaviour {
 
 	public bool FindShortestPath(GameObject floorObject, GameObject startNode, GameObject finishNode)
 	{
-		//List<string> unVisitedList = floorData.markerList.Select(x=>x.markerName).ToList(); //copy marker name list
-		//List<MarkerData> unVisitedList = floorData.markerList.ConvertAll(node => node.Clone() as MarkerData);  //<< deep clone it
+		ResetAllVertexData(floorObject);
 		FloorData currentFloor = floorObject.GetComponent<FloorData>();
 		
-		//List<MarkerData> unVisitedList = floorObject.GetComponent<FloorData>().markerList.ToList(); //---
-		List<GameObject> unVisitedList = floorObject.GetComponent<FloorData>().markerList.ToList(); //---
+		List<GameObject> unVisitedList = floorObject.GetComponent<FloorData>().markerList.ToList(); 
 		
 		bool isFounded = false;
 		float costToadjacentNode = 0;
@@ -124,9 +122,9 @@ public class DijsktraAlgorithm : MonoBehaviour {
 		return floorObject.GetComponent<FloorData>().markerList[0].gameObject;
 	}
 
-	public void ResetAllVertexData(FloorData floorData)
+	public void ResetAllVertexData(GameObject floorObject)
 	{
-		foreach (GameObject markerObj in floorData.markerList)
+		foreach (GameObject markerObj in floorObject.GetComponent<FloorData>().markerList)
 		{
 			MarkerData markerData = markerObj.GetComponent<MarkerData>();
 			markerData.cost = Single.PositiveInfinity;

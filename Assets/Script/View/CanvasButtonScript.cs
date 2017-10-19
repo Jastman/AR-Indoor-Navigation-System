@@ -197,11 +197,13 @@ public class CanvasButtonScript : MonoBehaviour {
 		foreach (GameObject markerob in searchMarkerList)
 		{
 			GameObject roomButton = Instantiate(roomButtonPrefab);
+			roomButton.GetComponent<RoomButtonScript>().room = markerob;
 			MarkerData markerdata = markerob.GetComponent<MarkerData>();
 			roomButton.transform.SetParent(searchContent.transform);
 			Text roomButtonText = roomButton.transform.GetChild(0).gameObject.GetComponent<Text>();
 			roomButtonText.text = markerdata.roomName;
 			roomButtonText.fontSize = canvasResolutionScript.GetScaledFontSize(45);
+			
 		}
 	}
 
@@ -245,7 +247,5 @@ public class CanvasButtonScript : MonoBehaviour {
 				markerdata.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y/1000)
 			);
 		}
-		
-		
 	}
 }

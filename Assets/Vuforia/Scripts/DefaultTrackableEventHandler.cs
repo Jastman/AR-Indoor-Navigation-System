@@ -82,7 +82,8 @@ namespace Vuforia
             {
                 component.enabled = true;
             }
-
+            
+            MainController.instance.SetBeginPoint(mTrackableBehaviour.gameObject);
             GameObject destinationPoint = GameObject.Find("Point");
             
             /* set started arrow rotation here */
@@ -92,6 +93,7 @@ namespace Vuforia
 			Debug.Log(mTrackableBehaviour.gameObject.name  + " Turn Default Position");
 
             Debug.Log("Trackable " + mTrackableBehaviour.TrackableName + " found");
+            
         }
 
 
