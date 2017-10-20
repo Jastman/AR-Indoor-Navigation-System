@@ -7,6 +7,7 @@ public class MarkerData : MonoBehaviour, ICloneable {
 
 	[Header("Marker Data")]
 	public Vector3 position = Vector3.zero;
+	public Vector3 referencePosition = Vector3.zero;
 	public Vector3 orientation = Vector3.zero;
 	public string floor = "0";
 	public string markerName = "";
@@ -34,6 +35,10 @@ public class MarkerData : MonoBehaviour, ICloneable {
 	// Use this for initialization
 	void Start () {
 		position = transform.localPosition;
+		Transform refPoint = transform.Find("ReferencePoint");
+		refPoint.SetParent(transform.parent);
+		referencePosition = refPoint.localPosition; //or from orientation + 2 radius
+		Destroy(refPoint.gameObject);
 		orientation = transform.rotation.eulerAngles;
 		Debug.Log("Start " + gameObject.name + " " +position);
 		markerName = gameObject.name.Replace("ImageTarget ","");
