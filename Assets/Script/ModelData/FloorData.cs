@@ -5,6 +5,7 @@ using UnityEngine;
 public class FloorData : MonoBehaviour {
 
 	public List<GameObject> markerList;
+	public List<GameObject> connectorList; //this list may check when remove
 	public string floorName = "0";
 
 	// Use this for initialization
@@ -16,10 +17,12 @@ public class FloorData : MonoBehaviour {
 			GameObject objToAdd = childTransform.gameObject;
 			if(objToAdd.GetComponent<MarkerData>() != null)
 			{
-				Debug.Log("Get Marker " + objToAdd.GetComponent<MarkerData>().markerName 
-					+ ": " +objToAdd.GetComponent<MarkerData>().position);
-				objToAdd.GetComponent<MarkerData>().floor = floorName;
+				MarkerData objData = objToAdd.GetComponent<MarkerData>();
+				Debug.Log("Get Marker " + objData.markerName 
+					+ ": " +objData.position);
+				objData.floor = floorName;
 				markerList.Add(objToAdd);
+				if(objData.IsConnector) {connectorList.Add(objToAdd);}
 			}
 		}
 	}
@@ -28,4 +31,12 @@ public class FloorData : MonoBehaviour {
 	void Update () {
 		
 	}
+
+	public GameObject GetBuilding()
+	{
+		//if(this.transform.parent.gameObject.GetComponent<BuildingData>() != null)
+		return this.transform.parent.gameObject;
+	}
+
+	
 }

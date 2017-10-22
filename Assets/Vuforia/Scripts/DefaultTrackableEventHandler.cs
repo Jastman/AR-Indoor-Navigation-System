@@ -88,8 +88,8 @@ namespace Vuforia
             
             /* set started arrow rotation here */
             mTrackableBehaviour.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().PointToZero();
-            mTrackableBehaviour.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().
-				PointToCoordinate(destinationPoint.GetComponent<MarkerData>().position);
+            // mTrackableBehaviour.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().
+			// 	PointToCoordinate(destinationPoint.GetComponent<MarkerData>().position);
 			Debug.Log(mTrackableBehaviour.gameObject.name  + " Turn Default Position");
 
             Debug.Log("Trackable " + mTrackableBehaviour.TrackableName + " found");

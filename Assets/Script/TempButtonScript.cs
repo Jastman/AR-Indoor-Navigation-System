@@ -67,24 +67,10 @@ public class TempButtonScript : MonoBehaviour {
 	public void FindPath() //find path from current marker --get destination
 	{
 		PointToZero();
-		FloorData currentFloor = testFloor.GetComponent<FloorData>();
-		GameObject finishNode = currentFloor.markerList[5];
 		IEnumerable<TrackableBehaviour> trackableList = arcamera.GetComponent<CameraFocusController>().GetActiveTrackable();
-		DijsktraAlgorithm dijsktra = new DijsktraAlgorithm();
 		foreach (TrackableBehaviour tr in trackableList)
 		{
-			GameObject startNode = tr.gameObject;
-			if (startNode == finishNode){
-				Debug.Log("=== Founded Destination ===");
-			} else if (dijsktra.FindShortestPath(testFloor, startNode, finishNode)) {
-				tr.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>()
-					.PointToCoordinate(startNode.GetComponent<MarkerData>().successor.GetComponent<MarkerData>().position);
-			} else {
-				tr.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>()
-					.PointToCoordinate(startNode.GetComponent<MarkerData>().successor.GetComponent<MarkerData>().position);
-			}
-			//case point to null of successor
-
+			MainController.instance.NavigateFrom(tr.gameObject);
 		}
 		
 	}

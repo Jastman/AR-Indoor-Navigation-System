@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BuidingData : MonoBehaviour {
+public class BuildingData : MonoBehaviour {
 
 	public List<GameObject> floorList;
 	public string buildingName = "Building";
@@ -54,5 +54,20 @@ public class BuidingData : MonoBehaviour {
 			}
 		}
 		return null; 											//not found return null
+	}
+
+	public bool IsSameFloor(GameObject firstNode, GameObject secondNode) /* check bool is same floor */
+	{
+		return firstNode.GetComponent<MarkerData>().floor == secondNode.GetComponent<MarkerData>().floor;
+	}
+
+	public GameObject GetConnector(GameObject Node) /* get gameObject of connector of that node floor, May have overloading*/
+	{
+		if(Node.GetComponent<MarkerData>().IsConnector) {
+			return Node;
+		} else { //return first of connector
+			return Node.GetComponent<MarkerData>().GetFloor().GetComponent<FloorData>().connectorList[0];
+		}
+		
 	}
 }

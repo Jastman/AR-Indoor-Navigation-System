@@ -25,7 +25,7 @@ public class CanvasResolutionScript : MonoBehaviour {
 
 	private RectTransform searchHelpText, searchList, viewPort, scrollbar;
 	private GridLayoutGroup searchContent;
-	private RectTransform mapImage, rightButton, leftButton;
+	private RectTransform mapImage, rightButton, leftButton, navline;
 
 	private List<GameObject> markerList; //not use now
 	
@@ -66,6 +66,7 @@ public class CanvasResolutionScript : MonoBehaviour {
 		mapImage = mapPanel.transform.Find("MapImage").GetComponent<RectTransform>();
 		rightButton = mapPanel.transform.Find("RightButton").GetComponent<RectTransform>();
 		leftButton = mapPanel.transform.Find("LeftButton").GetComponent<RectTransform>();
+		navline = mapPanel.transform.Find("Line").GetComponent<RectTransform>();
 	}
 	
 	// Update is called once per frame
@@ -160,6 +161,8 @@ public class CanvasResolutionScript : MonoBehaviour {
 		float mapPadding = 30f;
 		mapImage.sizeDelta = new Vector2(Screen.width-mapPadding, Screen.width-mapPadding);
 		mapImage.anchoredPosition = new Vector2(0, actionBarHeight/1.3f);
+		navline.sizeDelta = mapImage.sizeDelta;
+		navline.anchoredPosition = mapImage.anchoredPosition;
 	}
 	public void SetArrowButtonInMap()
 	{

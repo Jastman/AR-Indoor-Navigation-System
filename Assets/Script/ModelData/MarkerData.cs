@@ -13,6 +13,7 @@ public class MarkerData : MonoBehaviour, ICloneable {
 	public string markerName = "";
 	public string description = "";
 	public string roomName = "";
+	public bool IsConnector = false;
 
 	[Header("Vertex Data")]
 	public float cost = Single.PositiveInfinity;
@@ -82,11 +83,13 @@ public class MarkerData : MonoBehaviour, ICloneable {
     {
 		MarkerData markerDataClone = new MarkerData();
 		markerDataClone.position = this.position ;
+		markerDataClone.referencePosition = this.referencePosition ;
 		markerDataClone.orientation = this.orientation ;
 		markerDataClone.floor = this.floor;
 		markerDataClone.markerName = this.markerName;
 		markerDataClone.description = this.description ;
 		markerDataClone.roomName = this.roomName ;
+		markerDataClone.IsConnector = this.IsConnector;
 		
 		markerDataClone.cost = this.cost ;
 		markerDataClone.adjacentNodeList = this.adjacentNodeList ;
@@ -96,4 +99,10 @@ public class MarkerData : MonoBehaviour, ICloneable {
 		
 		return markerDataClone;
     }
+
+	public GameObject GetFloor() /* return gameObject of floorData */
+	{
+		//if(this.transform.parent.gameObject.GetComponent<FloorData>() != null)
+		return this.transform.parent.gameObject;
+	}
 }

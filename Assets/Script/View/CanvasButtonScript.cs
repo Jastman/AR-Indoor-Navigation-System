@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.UI.Extensions;
 
 public class CanvasButtonScript : MonoBehaviour {
 
@@ -13,10 +14,10 @@ public class CanvasButtonScript : MonoBehaviour {
 	private Text appNameText;
 
 	private GameObject searchHelpText, searchList, viewPort, scrollbar, searchContent;
-	private GameObject mapImage, rightButton, leftButton;
+	private GameObject mapImage, rightButton, leftButton, navline;
 
-	private BuidingData building;
-	private FloorData showingFloor;
+	private BuildingData building;
+	private GameObject showingFloor;
 	private List<GameObject> searchShowList;
 
 
@@ -32,8 +33,8 @@ public class CanvasButtonScript : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
-		building = GameObject.Find("IT Buiding").GetComponent<BuidingData>();
-		showingFloor = building.floorList[0].GetComponent<FloorData>();
+		building = GameObject.Find("IT Buiding").GetComponent<BuildingData>();
+		showingFloor = building.floorList[0];
 		searchShowList = new List<GameObject>();
 
 		canvasResolutionScript = gameObject.GetComponent<CanvasResolutionScript>();
@@ -58,6 +59,7 @@ public class CanvasButtonScript : MonoBehaviour {
 		mapImage = mapPanel.transform.Find("MapImage").gameObject;
 		rightButton = mapPanel.transform.Find("RightButton").gameObject;
 		leftButton = mapPanel.transform.Find("LeftButton").gameObject;
+		navline = mapPanel.transform.Find("Line").gameObject;
 
 		backButton.SetActive(false);
 		searchInputField.SetActive(false);
@@ -142,6 +144,7 @@ public class CanvasButtonScript : MonoBehaviour {
 
 		canvasResolutionScript.SetMapImageInMap();
 		canvasResolutionScript.SetArrowButtonInMap();
+		UpdateMap(showingFloor);
 	}
 
 	public void OnCloseMap()
@@ -209,23 +212,50 @@ public class CanvasButtonScript : MonoBehaviour {
 
 	public void OnShiftMap(bool isForward)
 	{
-		GameObject floorObject;
+		BuildingData building = showingFloor.GetComponent<FloorData>().GetBuilding().GetComponent<BuildingData>();
 		//check current floor
-		if (MainStaticData.floor != null) {
-			showingFloor = MainStaticData.floor.GetComponent<FloorData>();
-		}
+		// if (MainController.instance.beginPoint != null) {
+		// 	showingFloor = MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor().GetComponent<FloorData>();
+		// }
 
 		//get next floor from buildingData
-		floorObject = isForward ? building.GetNextFloor(showingFloor.floorName) : building.GetPreviousFloor(showingFloor.floorName);
+		GameObject floorObject = isForward ? 
+			building.GetNextFloor(showingFloor.GetComponent<FloorData>().floorName) : 
+			building.GetPreviousFloor(showingFloor.GetComponent<FloorData>().floorName);
 
+		UpdateMap(floorObject);
+	}
+
+	private void UpdateMap(GameObject floorObject)
+	{
+		BuildingData building = showingFloor.GetComponent<FloorData>().GetBuilding().GetComponent<BuildingData>();
 		// get material from first child of floorData 
 		Material floorMaterial = floorObject.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>().materials[0];
 		mapImage.GetComponent<Image>().material = floorMaterial;
 		ShowMarkerOfFloor(floorObject);
-		showingFloor = floorObject.GetComponent<FloorData>();
+		//check floor, start stop of that floor
+		if (MainController.instance.appState == MainController.AppState.Navigate 
+			&& MainController.instance.destinationPoint != null) {
+			if (building.IsSameFloor(MainController.instance.beginPoint, MainController.instance.destinationPoint) //loking fl in same
+				&& MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor() == floorObject) {
+				ShowLine(MainController.instance.beginPoint, MainController.instance.destinationPoint);
+			} else {
+				if(MainController.instance.beginPoint.GetComponent<FloorData>() == floorObject) { //swap to begin fl
+					ShowLine(MainController.instance.beginPoint, building.GetConnector(MainController.instance.beginPoint));
+				} else if (MainController.instance.destinationPoint.GetComponent<FloorData>() == floorObject) { //swap in dest fl
+					ShowLine(MainController.instance.beginPoint, building.GetConnector(MainController.instance.beginPoint));
+				} else {
+					//check is looking floor are inbeetween 
+					//if yes green dot in lift
+					//if no, will not show line in 
+					ClearLine();
+				}
+			} 
+		}
+		showingFloor = floorObject;
 	}
 
-	public void ShowMarkerOfFloor(GameObject floorObject)
+	public void ShowMarkerOfFloor(GameObject floorObject) /* show marker in map */
 	{
 		GameObject markers = mapImage.transform.GetChild(0).gameObject;
 		//destroy all marker
@@ -247,5 +277,60 @@ public class CanvasButtonScript : MonoBehaviour {
 				markerdata.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y/1000)
 			);
 		}
+	}
+
+	private void ShowLine(GameObject begin, GameObject destination) /* show green navigate line on map */
+	{
+		UILineRenderer line = navline.GetComponent<UILineRenderer>();
+		line.Points.Clear();
+		MarkerData checkPoint = begin.GetComponent<MarkerData>();
+		int i = 0;
+		//Debug.Log("Write Line At " + checkPoint.markerName + " " + line.Points(i));
+		while(checkPoint.successor != null)
+		{
+			Debug.Log("Checking Point are " + checkPoint.markerName);
+			  // last point point to marker position
+			line.Points.Add(new Vector2(
+				checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x/1000),
+				checkPoint.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y/1000)
+			));
+			//line.OnRebuildRequested();
+			i++;
+			checkPoint = checkPoint.successor.GetComponent<MarkerData>();
+		}
+		// add last point
+		line.Points.Add(new Vector2(
+			checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x/1000),
+			checkPoint.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y/1000)
+		));
+		line.Points.Add(new Vector2(
+			checkPoint.position.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x/1000),
+			checkPoint.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y/1000)
+		));
+		line.OnRebuildRequested();
+	}
+
+	private void ShowLine(GameObject point) /*draw line on connector point */
+	{
+		UILineRenderer line = navline.GetComponent<UILineRenderer>();
+		line.Points.Clear();
+		MarkerData checkPoint = point.GetComponent<MarkerData>();
+		
+		line.Points.Add(new Vector2(
+			checkPoint.position.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x/1000),
+			checkPoint.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y/1000)
+		));
+		line.Points.Add(new Vector2(
+			checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x/1000),
+			checkPoint.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y/1000)
+		));
+		line.OnRebuildRequested();
+	}
+
+	private void ClearLine() /* don't show line in that floor */
+	{
+		UILineRenderer line = navline.GetComponent<UILineRenderer>();
+		line.Points.Clear();
+		line.OnRebuildRequested();
 	}
 }
