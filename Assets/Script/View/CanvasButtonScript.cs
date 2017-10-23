@@ -14,7 +14,7 @@ public class CanvasButtonScript : MonoBehaviour {
 	private Text appNameText;
 
 	private GameObject searchHelpText, searchList, viewPort, scrollbar, searchContent;
-	private GameObject mapImage, rightButton, leftButton, navline;
+	private GameObject mapImage, rightButton, leftButton, navline, userDot;
 
 	private BuildingData building;
 	private GameObject showingFloor;
@@ -59,7 +59,8 @@ public class CanvasButtonScript : MonoBehaviour {
 		mapImage = mapPanel.transform.Find("MapImage").gameObject;
 		rightButton = mapPanel.transform.Find("RightButton").gameObject;
 		leftButton = mapPanel.transform.Find("LeftButton").gameObject;
-		navline = mapPanel.transform.Find("Line").gameObject;
+		navline = mapImage.transform.Find("Line").gameObject;
+		userDot = mapImage.transform.Find("UserDot").gameObject;
 
 		backButton.SetActive(false);
 		searchInputField.SetActive(false);
@@ -81,6 +82,8 @@ public class CanvasButtonScript : MonoBehaviour {
 		}
 	}
 
+#region Open New Page
+	
 	public void OnOpenSerch()
 	{
 		page = Page.Search;
@@ -166,6 +169,7 @@ public class CanvasButtonScript : MonoBehaviour {
 		canvasResolutionScript.SetSearchButtonInMain();
 		canvasResolutionScript.SetAppNameInMain();
 	}
+#endregion
 
 	public void OnTyping()
 	{
@@ -226,14 +230,14 @@ public class CanvasButtonScript : MonoBehaviour {
 		UpdateMap(floorObject);
 	}
 
-	private void UpdateMap(GameObject floorObject)
+	private void UpdateMap(GameObject floorObject) /* Update current floor of map page */
 	{
 		BuildingData building = showingFloor.GetComponent<FloorData>().GetBuilding().GetComponent<BuildingData>();
 		// get material from first child of floorData 
 		Material floorMaterial = floorObject.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>().materials[0];
 		mapImage.GetComponent<Image>().material = floorMaterial;
 		ShowMarkerOfFloor(floorObject);
-		//check floor, start stop of that floor
+		//check floor, start stop of that floor for line
 		if (MainController.instance.appState == MainController.AppState.Navigate 
 			&& MainController.instance.destinationPoint != null) {
 			if (building.IsSameFloor(MainController.instance.beginPoint, MainController.instance.destinationPoint) //loking fl in same
@@ -250,8 +254,16 @@ public class CanvasButtonScript : MonoBehaviour {
 					//if no, will not show line in 
 					ClearLine();
 				}
-			} 
+			}
 		}
+		//check floor and current position for user dot
+		userDot.SetActive(false);
+		if (MainController.instance.beginPoint != null) {
+			if (MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor() == floorObject) {
+				ShowUserDot(MainController.instance.beginPoint);
+			}
+		}
+		
 		showingFloor = floorObject;
 	}
 
@@ -307,7 +319,7 @@ public class CanvasButtonScript : MonoBehaviour {
 			checkPoint.position.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x/1000),
 			checkPoint.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y/1000)
 		));
-		line.OnRebuildRequested();
+		line.SetVerticesDirty();
 	}
 
 	private void ShowLine(GameObject point) /*draw line on connector point */
@@ -324,13 +336,29 @@ public class CanvasButtonScript : MonoBehaviour {
 			checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x/1000),
 			checkPoint.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y/1000)
 		));
-		line.OnRebuildRequested();
+		line.SetVerticesDirty();
 	}
 
 	private void ClearLine() /* don't show line in that floor */
 	{
 		UILineRenderer line = navline.GetComponent<UILineRenderer>();
 		line.Points.Clear();
-		line.OnRebuildRequested();
+		line.SetVerticesDirty();
+	}
+
+	private void ShowUserDot(GameObject point)
+	{
+		userDot.SetActive(true);
+		MarkerData markerdata = point.GetComponent<MarkerData>();
+		RectTransform dotRect = userDot.GetComponent<RectTransform>();
+		dotRect.anchoredPosition = new Vector2(
+			markerdata.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x/1000),
+			markerdata.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y/1000)
+		);
+		float deltaX = markerdata.referencePosition.x - markerdata.position.x;
+		float deltaY = markerdata.referencePosition.z - markerdata.position.z;
+		dotRect.rotation = Quaternion.Euler(new Vector3( 0, 0,
+			(((Mathf.Atan2(deltaY, deltaX))*180/Mathf.PI) + 90) 
+		));
 	}
 }
