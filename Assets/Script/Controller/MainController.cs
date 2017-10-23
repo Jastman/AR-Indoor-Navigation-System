@@ -94,6 +94,7 @@ public class MainController : MonoBehaviour {
 		if(destinationPoint.GetComponent<MarkerData>() != null)
 		{
 			this.destinationPoint = destinationPoint;
+			canvasButton.OnCloseSerch();
 			Debug.Log("Set Destination Point to " + destinationPoint.GetComponent<MarkerData>().roomName);
 		}
 		

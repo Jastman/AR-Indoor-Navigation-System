@@ -877,7 +877,7 @@ MonoBehaviour:
   floor: 0
   markerName: 
   description: fghaa
-  roomName: 7 fghaa
+  roomName: "\u0E2B\u0E49\u0E2D\u0E07\u0E40\u0E08\u0E47\u0E14"
   IsConnector: 0
   cost: Infinity
   adjacentNodeList:
@@ -4725,7 +4725,7 @@ MonoBehaviour:
   floor: 0
   markerName: 
   description: 
-  roomName: 1 aabbcc
+  roomName: 2 aabbcc
   IsConnector: 0
   cost: Infinity
   adjacentNodeList:
@@ -10717,7 +10717,7 @@ MonoBehaviour:
   floor: 0
   markerName: 
   description: 
-  roomName: 8 ddeecc lift
+  roomName: "\u0E2B\u0E49\u0E2D\u0E07\u0E40\u0E08\u0E47\u0E14"
   IsConnector: 1
   cost: Infinity
   adjacentNodeList:
@@ -12574,7 +12574,7 @@ MonoBehaviour:
   floor: 0
   markerName: 
   description: 
-  roomName: 4 ccddee
+  roomName: "\u0E2A\u0E35\u0E48\u0E46\u0E46\u0E46"
   IsConnector: 0
   cost: Infinity
   adjacentNodeList:
@@ -13402,7 +13402,7 @@ MonoBehaviour:
   floor: 0
   markerName: 
   description: 
-  roomName: 5 ccddt
+  roomName: "\u0E2A\u0E35\u0E48\u0E46\u0E46\u0E46"
   IsConnector: 0
   cost: Infinity
   adjacentNodeList:

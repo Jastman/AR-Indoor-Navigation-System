@@ -180,10 +180,10 @@ public class CanvasButtonScript : MonoBehaviour {
 			foreach (GameObject marker in floor.GetComponent<FloorData>().markerList)
 			{
 				MarkerData markerData = marker.GetComponent<MarkerData>();
-				if(typingWord == "") {
-					Debug.Log(typingWord +" In " + markerData.roomName);
+				if(typingWord == "" && !IsDuplicateShowingRoom(searchShowList, markerData.roomName)) {
+					Debug.Log(typingWord +" In " + markerData.roomName );
 					searchShowList.Add(marker);	
-				} else if (markerData.roomName.Contains(typingWord)) {
+				} else if (markerData.roomName.Contains(typingWord) && !IsDuplicateShowingRoom(searchShowList, markerData.roomName)) { 
 					Debug.Log(typingWord +" In " + markerData.roomName);
 					searchShowList.Add(marker);
 				}
@@ -192,8 +192,21 @@ public class CanvasButtonScript : MonoBehaviour {
 		ShowAllRoomOf(searchShowList);
 	}
 
+	// detect too much loop here
+	private bool IsDuplicateShowingRoom(List<GameObject> searchLst, string findingMarkerName) /* false if already has marker of that room */
+	{
+		foreach (GameObject mk in searchLst)
+		{
+			if(mk.GetComponent<MarkerData>().roomName == findingMarkerName){
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void ShowAllRoomOf(List<GameObject> searchMarkerList)
 	{
+		bool colored = false;
 		//destroy all list
 		Debug.Log(searchContent.transform.childCount);
 		foreach (Transform ch in searchContent.transform)
@@ -210,7 +223,12 @@ public class CanvasButtonScript : MonoBehaviour {
 			Text roomButtonText = roomButton.transform.GetChild(0).gameObject.GetComponent<Text>();
 			roomButtonText.text = markerdata.roomName;
 			roomButtonText.fontSize = canvasResolutionScript.GetScaledFontSize(45);
-			
+			if(MainController.instance.beginPoint != null && !colored) { 
+				if(MainController.instance.beginPoint.GetComponent<MarkerData>().roomName == markerdata.roomName) {
+					roomButton.GetComponent<Image>().color = new Color(0,255,0); // << Color does not change
+					colored = true;
+				}
+			}
 		}
 	}
 
