@@ -70,7 +70,10 @@ public class TempButtonScript : MonoBehaviour {
 		IEnumerable<TrackableBehaviour> trackableList = arcamera.GetComponent<CameraFocusController>().GetActiveTrackable();
 		foreach (TrackableBehaviour tr in trackableList)
 		{
-			MainController.instance.NavigateFrom(tr.gameObject);
+			MainController.instance.SetBeginPoint(tr.gameObject);
+			if(MainController.instance.beginPoint != null && MainController.instance.destinationPoint != null) {
+				MainController.instance.Navigate();
+			}
 		}
 		
 	}

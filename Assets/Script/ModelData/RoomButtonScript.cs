@@ -19,6 +19,9 @@ public class RoomButtonScript : MonoBehaviour {
 	public void SetDestination()
 	{
 		MainController.instance.SetDestinationPoint(room);
+		if(MainController.instance.beginPoint != null && MainController.instance.destinationPoint != null) {
+			MainController.instance.Navigate();
+		}
 	}
 
 	public void PrintName()

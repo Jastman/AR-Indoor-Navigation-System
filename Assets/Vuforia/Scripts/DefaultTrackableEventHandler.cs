@@ -84,7 +84,6 @@ namespace Vuforia
             }
             
             MainController.instance.SetBeginPoint(mTrackableBehaviour.gameObject);
-            GameObject destinationPoint = GameObject.Find("Point");
             
             /* set started arrow rotation here */
             mTrackableBehaviour.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().PointToZero();

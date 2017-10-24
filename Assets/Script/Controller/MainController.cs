@@ -8,6 +8,7 @@ public class MainController : MonoBehaviour {
 	private DijsktraAlgorithm dijsktra;
 	private CanvasButtonScript canvasButton;
 	private CanvasResolutionScript canvasResolution;
+	public GameObject arrowPrefab, descriptionBoardPrefab;
 	public GameObject beginPoint = null, destinationPoint = null;
 	public enum AppState
 	{
@@ -34,13 +35,12 @@ public class MainController : MonoBehaviour {
 		
 	}
 
-	public void NavigateFrom(GameObject currentPoint) 
-	/* get currrent point set to begin and run navigate 
+	public void Navigate() 
+	/* run navigate algorithm by usion beginpoint and destpoint to update all markerdata value
 	if in same floor, navigate to connecttor of floor 
 	if can't find route, arrow will directly point to destination*/
 	{
 		appState = AppState.Navigate;
-		SetBeginPoint(currentPoint);
 		BuildingData building = this.beginPoint.GetComponent<MarkerData>()
 				.GetFloor().GetComponent<FloorData>()
 				.GetBuilding().GetComponent<BuildingData>();
@@ -85,6 +85,16 @@ public class MainController : MonoBehaviour {
 		{
 			this.beginPoint = beginPoint;
 			Debug.Log("Set Begin Point to " + beginPoint.GetComponent<MarkerData>().roomName);
+			if(appState == AppState.Idle) { //set desboard
+				//check have child that name contains arrow and only one. don't destroy and use it
+				/* set started arrow rotation here */
+				mTrackableBehaviour.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().PointToZero();
+				// mTrackableBehaviour.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().
+				// 	PointToCoordinate(destinationPoint.GetComponent<MarkerData>().position);
+				Debug.Log(mTrackableBehaviour.gameObject.name  + " Turn Default Position");
+			} else if (appState == AppState.Navigate) { //set arrow
+
+			} 
 		}
 		
 	}
