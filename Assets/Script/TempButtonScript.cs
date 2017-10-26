@@ -18,7 +18,7 @@ public class TempButtonScript : MonoBehaviour {
 		IEnumerable<TrackableBehaviour> trackableList = arcamera.GetComponent<CameraFocusController>().GetActiveTrackable();
 		foreach (TrackableBehaviour tr in trackableList)
 		{
-			tr.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().
+			tr.gameObject.GetComponentInChildren<ArrowScript>().
 				PointToCoordinate(destinationPoint.GetComponent<MarkerData>().position);
 			Debug.Log(tr.gameObject.name + " Turn Default Position");
 		}
@@ -36,7 +36,7 @@ public class TempButtonScript : MonoBehaviour {
 		IEnumerable<TrackableBehaviour> trackableList = arcamera.GetComponent<CameraFocusController>().GetActiveTrackable();
 		foreach (TrackableBehaviour tr in trackableList)
 		{
-			tr.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().RotateArrow(new Vector3(0, 0, zRotateDegree));
+			tr.gameObject.GetComponent<ArControlScript>().GetArrow().GetComponent<ArrowScript>().RotateArrow(new Vector3(0, 0, zRotateDegree));
 			Debug.Log(tr.gameObject.name + " to Left");
 		}
 	}
@@ -48,7 +48,7 @@ public class TempButtonScript : MonoBehaviour {
 		IEnumerable<TrackableBehaviour> trackableList = arcamera.GetComponent<CameraFocusController>().GetActiveTrackable();
 		foreach (TrackableBehaviour tr in trackableList)
 		{
-			tr.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().RotateArrow(new Vector3(0, 0, zRotateDegree));
+			tr.gameObject.GetComponent<ArControlScript>().GetArrow().GetComponent<ArrowScript>().RotateArrow(new Vector3(0, 0, zRotateDegree));
 			Debug.Log(tr.gameObject.name + " to Right");
 		}
 	}
@@ -59,21 +59,22 @@ public class TempButtonScript : MonoBehaviour {
 		IEnumerable<TrackableBehaviour> trackableList = arcamera.GetComponent<CameraFocusController>().GetActiveTrackable();
 		foreach (TrackableBehaviour tr in trackableList)
 		{
-			tr.gameObject.transform.GetChild(0).gameObject.GetComponent<ArrowScript>().PointToZero();
+			tr.gameObject.GetComponent<ArControlScript>().GetArrow().GetComponent<ArrowScript>().PointToZero();
 			Debug.Log(tr.gameObject.name + " to Zero");
 		}
 	}
 
 	public void FindPath() //find path from current marker --get destination
 	{
-		PointToZero();
 		IEnumerable<TrackableBehaviour> trackableList = arcamera.GetComponent<CameraFocusController>().GetActiveTrackable();
 		foreach (TrackableBehaviour tr in trackableList)
 		{
 			MainController.instance.SetBeginPoint(tr.gameObject);
 			if(MainController.instance.beginPoint != null && MainController.instance.destinationPoint != null) {
 				MainController.instance.Navigate();
+				Debug.Log("Navigate");
 			}
+			MainController.instance.ShowAR();
 		}
 		
 	}

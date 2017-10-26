@@ -33,6 +33,7 @@ public class ArrowScript : MonoBehaviour {
 
 	public void PointToCoordinate(Vector3 destination) /* Get Destination of object to point, return degree and rotate arrow */
 	{	
+		targetData = transform.parent.gameObject.GetComponent<MarkerData>();
 		float planeDistance = Vector2.Distance(targetData.position, destination);
 		float deltaX = targetData.position.x - destination.x;
 		float deltaY = targetData.position.z - destination.z;
@@ -40,5 +41,9 @@ public class ArrowScript : MonoBehaviour {
 		transform.Rotate(0, 0, (((Mathf.Atan2(deltaY, -deltaX))*180/Mathf.PI) + markerXRotation) + (360-targetData.orientation.y) );
 		Debug.Log("-- " + targetData.position + " " + destination);
 		Debug.Log("-- Point ToCoorDinate -- " + deltaY + " " + deltaX + " "  + (((Mathf.Atan2(deltaY, -deltaX))*180/Mathf.PI) + 270));
+	}
+
+	public void PrintSmt(string p){
+		Debug.Log(p);
 	}
 }
