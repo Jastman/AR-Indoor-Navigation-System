@@ -113,7 +113,7 @@ public class CanvasButtonScript : MonoBehaviour {
 		page = Page.Main;
 		mapPanel.SetActive(false);
 		searchPanel.SetActive(false);
-		hambergerButton.SetActive(true);
+		hambergerButton.SetActive(false);
 		mapButton.SetActive(true);
 		searchButton.SetActive(true);
 		appName.SetActive(true);
@@ -122,7 +122,7 @@ public class CanvasButtonScript : MonoBehaviour {
 		searchInputField.SetActive(false);
 		clearButton.SetActive(false);
 
-		canvasResolutionScript.SetHambergerButtonInMain();
+		//canvasResolutionScript.SetHambergerButtonInMain();
 		canvasResolutionScript.SetMapButtonInMain();
 		canvasResolutionScript.SetSearchButtonInMain();
 		canvasResolutionScript.SetAppNameInMain();
@@ -147,6 +147,10 @@ public class CanvasButtonScript : MonoBehaviour {
 
 		canvasResolutionScript.SetMapImageInMap();
 		canvasResolutionScript.SetArrowButtonInMap();
+		if(MainController.instance.beginPoint != null)
+		{
+			showingFloor = MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor();
+		}
 		UpdateMap(showingFloor);
 	}
 
@@ -155,7 +159,7 @@ public class CanvasButtonScript : MonoBehaviour {
 		page = Page.Main;
 		mapPanel.SetActive(false);
 		searchPanel.SetActive(false);
-		hambergerButton.SetActive(true);
+		hambergerButton.SetActive(false);
 		mapButton.SetActive(true);
 		searchButton.SetActive(true);
 		appName.SetActive(true);
@@ -164,7 +168,7 @@ public class CanvasButtonScript : MonoBehaviour {
 		searchInputField.SetActive(false);
 		clearButton.SetActive(false);
 
-		canvasResolutionScript.SetHambergerButtonInMain();
+		//canvasResolutionScript.SetHambergerButtonInMain();
 		canvasResolutionScript.SetMapButtonInMain();
 		canvasResolutionScript.SetSearchButtonInMain();
 		canvasResolutionScript.SetAppNameInMain();
@@ -211,7 +215,6 @@ public class CanvasButtonScript : MonoBehaviour {
 		Debug.Log(searchContent.transform.childCount);
 		foreach (Transform ch in searchContent.transform)
 		{
-			Debug.Log("Destroy" + ch);
 			Destroy(ch.gameObject);
 		}
 		foreach (GameObject markerob in searchMarkerList)
@@ -235,10 +238,6 @@ public class CanvasButtonScript : MonoBehaviour {
 	public void OnShiftMap(bool isForward)
 	{
 		BuildingData building = showingFloor.GetComponent<FloorData>().GetBuilding().GetComponent<BuildingData>();
-		//check current floor
-		// if (MainController.instance.beginPoint != null) {
-		// 	showingFloor = MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor().GetComponent<FloorData>();
-		// }
 
 		//get next floor from buildingData
 		GameObject floorObject = isForward ? 
@@ -250,29 +249,47 @@ public class CanvasButtonScript : MonoBehaviour {
 
 	private void UpdateMap(GameObject floorObject) /* Update current floor of map page */
 	{
-		BuildingData building = showingFloor.GetComponent<FloorData>().GetBuilding().GetComponent<BuildingData>();
+		BuildingData building = floorObject.GetComponent<FloorData>().GetBuilding().GetComponent<BuildingData>();
 		// get material from first child of floorData 
 		Material floorMaterial = floorObject.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>().materials[0];
 		mapImage.GetComponent<Image>().material = floorMaterial;
 		ShowMarkerOfFloor(floorObject);
+
 		//check floor, start stop of that floor for line
 		if (MainController.instance.appState == MainController.AppState.Navigate 
-			&& MainController.instance.destinationPoint != null) {
+			&& MainController.instance.destinationPoint != null) 
+		{
+			GameObject beginFloor = MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor();
+			GameObject destinationFloor = MainController.instance.destinationPoint.GetComponent<MarkerData>().GetFloor();
 			if (building.IsSameFloor(MainController.instance.beginPoint, MainController.instance.destinationPoint) //loking fl in same
-				&& MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor() == floorObject) {
+				&& beginFloor == floorObject) {
 				ShowLine(MainController.instance.beginPoint, MainController.instance.destinationPoint);
+				Debug.Log(" Show Line In Same Floor");
 			} else {
-				if(MainController.instance.beginPoint.GetComponent<FloorData>() == floorObject) { //swap to begin fl
+				if(beginFloor == floorObject) { //swap to begin fl
 					ShowLine(MainController.instance.beginPoint, building.GetConnector(MainController.instance.beginPoint));
-				} else if (MainController.instance.destinationPoint.GetComponent<FloorData>() == floorObject) { //swap in dest fl
-					ShowLine(MainController.instance.beginPoint, building.GetConnector(MainController.instance.beginPoint));
+				} else if (destinationFloor == floorObject) { //swap in dest fl
+					ShowLine(building.GetConnector(MainController.instance.destinationPoint), MainController.instance.destinationPoint);
 				} else {
 					//check is looking floor are inbeetween 
 					//if yes green dot in lift
+					if(beginFloor.GetComponent<FloorData>().floorIndex < destinationFloor.GetComponent<FloorData>().floorIndex 
+						&& floorObject.GetComponent<FloorData>().floorIndex < destinationFloor.GetComponent<FloorData>().floorIndex 
+						&& floorObject.GetComponent<FloorData>().floorIndex > beginFloor.GetComponent<FloorData>().floorIndex) {
+							ShowLine(floorObject.GetComponent<FloorData>().connectorList[0]);
+					} else if (beginFloor.GetComponent<FloorData>().floorIndex > destinationFloor.GetComponent<FloorData>().floorIndex
+						&& floorObject.GetComponent<FloorData>().floorIndex > destinationFloor.GetComponent<FloorData>().floorIndex 
+						&& floorObject.GetComponent<FloorData>().floorIndex < beginFloor.GetComponent<FloorData>().floorIndex) {
+							ShowLine(floorObject.GetComponent<FloorData>().connectorList[0]);
+					} else {
+						ClearLine();
+					}
 					//if no, will not show line in 
-					ClearLine();
 				}
 			}
+		}
+		else if(MainController.instance.appState == MainController.AppState.Idle) {
+			ClearLine();
 		}
 		//check floor and current position for user dot
 		userDot.SetActive(false);
@@ -324,7 +341,6 @@ public class CanvasButtonScript : MonoBehaviour {
 				checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x/1000),
 				checkPoint.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y/1000)
 			));
-			//line.OnRebuildRequested();
 			i++;
 			checkPoint = checkPoint.successor.GetComponent<MarkerData>();
 		}
@@ -342,6 +358,7 @@ public class CanvasButtonScript : MonoBehaviour {
 
 	private void ShowLine(GameObject point) /*draw line on connector point */
 	{
+		Debug.Log(" in Lift");
 		UILineRenderer line = navline.GetComponent<UILineRenderer>();
 		line.Points.Clear();
 		MarkerData checkPoint = point.GetComponent<MarkerData>();

@@ -53,6 +53,7 @@ public class MainController : MonoBehaviour
 
         if (building.IsSameFloor(this.beginPoint, this.destinationPoint))
         {
+            Debug.Log("Same Floor  Navigating " + this.beginPoint.GetComponent<MarkerData>().floor);
             if (this.beginPoint == this.destinationPoint)
             {
                 Debug.Log("=== Founded Destination ===");
@@ -70,13 +71,14 @@ public class MainController : MonoBehaviour
         }
         else
         {
-            if (dijsktra.FindShortestPath(
+            Debug.Log("Different Floor  Navigating " + this.beginPoint.GetComponent<MarkerData>().floor +" To " + this.destinationPoint.GetComponent<MarkerData>().floor);
+            bool begintoLift = dijsktra.FindShortestPath(
                     this.beginPoint.GetComponent<MarkerData>().GetFloor(),
-                    this.beginPoint, building.GetConnector(this.beginPoint))
-                && dijsktra.FindShortestPath(
-                        this.beginPoint.GetComponent<MarkerData>().GetFloor(),
-                        building.GetConnector(this.destinationPoint), this.destinationPoint)
-                )
+                    this.beginPoint, building.GetConnector(this.beginPoint));
+            bool liftToDest = dijsktra.FindShortestPath(
+                    this.destinationPoint.GetComponent<MarkerData>().GetFloor(),
+                    building.GetConnector(this.destinationPoint), this.destinationPoint);
+            if (begintoLift && liftToDest)
             {
                 navigatable = true;
             }

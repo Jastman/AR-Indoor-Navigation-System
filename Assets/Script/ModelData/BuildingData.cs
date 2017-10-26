@@ -9,13 +9,16 @@ public class BuildingData : MonoBehaviour {
 
 	// Use this for initialization
 	void Start () {
+		int index = 0;
 		foreach (Transform childTransform in transform)
 		{
 			GameObject objToAdd = childTransform.gameObject;
 			if(objToAdd.GetComponent<FloorData>() != null)
 			{
-				//buiding name didn't get nam from gameobject name
+				//buiding name didn't get name from gameobject name
 				Debug.Log("Get Floor " + objToAdd.GetComponent<FloorData>().floorName);
+				objToAdd.GetComponent<FloorData>().floorIndex = index;
+				index++;
 				floorList.Add(objToAdd);
 			}
 		}
@@ -58,7 +61,7 @@ public class BuildingData : MonoBehaviour {
 
 	public bool IsSameFloor(GameObject firstNode, GameObject secondNode) /* check bool is same floor */
 	{
-		return firstNode.GetComponent<MarkerData>().floor == secondNode.GetComponent<MarkerData>().floor;
+		return (firstNode.GetComponent<MarkerData>().floor == secondNode.GetComponent<MarkerData>().floor);
 	}
 
 	public GameObject GetConnector(GameObject Node) /* get gameObject of connector of that node floor, May have overloading*/

@@ -7,6 +7,7 @@ public class FloorData : MonoBehaviour {
 	public List<GameObject> markerList;
 	public List<GameObject> connectorList; //this list may check when remove
 	public string floorName = "0";
+	public int floorIndex = 0;
 
 	// Use this for initialization
 	void Start () {

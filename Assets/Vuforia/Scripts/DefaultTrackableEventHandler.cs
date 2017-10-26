@@ -84,8 +84,8 @@ namespace Vuforia
             }
             
             MainController.instance.SetBeginPoint(mTrackableBehaviour.gameObject);
-            if(MainController.instance.beginPoint != null && MainController.instance.destinationPoint != null 
-                    && MainController.instance.appState == MainController.AppState.Navigate) {
+            if(MainController.instance.beginPoint != null && MainController.instance.destinationPoint != null) {
+                MainController.instance.appState = MainController.AppState.Navigate;
 				MainController.instance.Navigate();
 				Debug.Log("Navigate");
 			}
