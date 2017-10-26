@@ -127,13 +127,14 @@ public class CanvasResolutionScript : MonoBehaviour {
 		float helpTextPadding = 20f;
 		searchHelpText.sizeDelta = new Vector2(Screen.width - helpTextPadding, 50); //<< 50
 		searchHelpText.anchoredPosition = new Vector2(0, -1*(actionBarHeight + (helpTextPadding/2f) + (searchHelpText.sizeDelta.y/2f)));
+		searchHelpText.gameObject.GetComponent<Text>().fontSize = GetScaledFontSize(36);
 	}
 	public void SetScrollListInSearch()
 	{
 		float scrollbarPadding = 20f;
 		Debug.Log("scrollbar set");
 		searchList.sizeDelta = new Vector2(
-			Screen.width - scrollbarPadding, 
+			Screen.width, 
 			Screen.height - actionBarHeight - searchHelpText.sizeDelta.y - scrollbarPadding
 			);
 		searchList.anchoredPosition = new Vector2(0, -1f*(searchList.sizeDelta.y/2 + actionBarHeight 
@@ -141,8 +142,9 @@ public class CanvasResolutionScript : MonoBehaviour {
 	}
 	public void SetContentInSearch()
 	{
-		searchContent.cellSize = new Vector2(searchList.sizeDelta.x - actionBarHeight, actionBarHeight/1.5f);
-		searchContent.spacing = new Vector2(actionBarHeight/5f, actionBarHeight/5f);
+		float spacingofcellsize = 0.1f;
+		searchContent.cellSize = new Vector2(searchList.sizeDelta.x - spacingofcellsize, actionBarHeight*0.9f);
+		searchContent.spacing = new Vector2(searchContent.cellSize.y*spacingofcellsize, searchContent.cellSize.y*spacingofcellsize);
 	}
 	#endregion
 

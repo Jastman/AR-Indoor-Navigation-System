@@ -10,6 +10,7 @@ public class MainController : MonoBehaviour
     private CanvasButtonScript canvasButton;
     private CanvasResolutionScript canvasResolution;
     public GameObject beginPoint = null, destinationPoint = null;
+    private GameObject oldBeginPoint = null, oldDestinationPoint = null; 
     public enum AppState
     {
         Idle,
@@ -17,6 +18,7 @@ public class MainController : MonoBehaviour
     }
 
     public AppState appState = AppState.Idle;
+    private AppState oldAppState = AppState.Idle;
     private bool navigatable = false;
 
     void Awake()
@@ -38,7 +40,40 @@ public class MainController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        /* observer zone */
+        if(appState != oldAppState)
+        {
+            //call observer
+            canvasButton.ChangeActionBarColor();
+            oldAppState = appState;
+        }
 
+        if(beginPoint != oldBeginPoint)
+        {
+            if(appState == AppState.Idle)
+            {
+                canvasButton.ChangeActionText("อยู่ที่: "+beginPoint.GetComponent<MarkerData>().roomName);
+                if(destinationPoint != null){
+                    if(destinationPoint == beginPoint){
+                        canvasButton.ChangeActionText("ถึงแล้ว: "+beginPoint.GetComponent<MarkerData>().roomName);
+                    }
+                }
+            }
+            else if(appState == AppState.Navigate)
+            {
+                canvasButton.ChangeActionText("กำลังไปยัง: "+destinationPoint.GetComponent<MarkerData>().roomName);
+            }
+            oldBeginPoint = beginPoint;
+        }
+
+        if(destinationPoint != oldDestinationPoint)
+        {
+            if(appState == AppState.Navigate)
+            {
+                canvasButton.ChangeActionText("กำลังไปยัง: "+destinationPoint.GetComponent<MarkerData>().roomName);
+            }
+            oldDestinationPoint = destinationPoint;
+        }
     }
 
     public void Navigate()
