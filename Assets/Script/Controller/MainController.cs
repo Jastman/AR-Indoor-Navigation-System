@@ -9,8 +9,10 @@ public class MainController : MonoBehaviour
     private DijsktraAlgorithm dijsktra;
     private CanvasButtonScript canvasButton;
     private CanvasResolutionScript canvasResolution;
-    public GameObject beginPoint = null, destinationPoint = null;
-    private GameObject oldBeginPoint = null, oldDestinationPoint = null; 
+    public GameObject beginPoint = null;
+    public GameObject destinationPoint = null;
+    public GameObject reachedPoint = null;
+    private GameObject oldBeginPoint = null, oldDestinationPoint = null, oldReachePoint = null;
     public enum AppState
     {
         Idle,
@@ -19,7 +21,7 @@ public class MainController : MonoBehaviour
 
     public AppState appState = AppState.Idle;
     private AppState oldAppState = AppState.Idle;
-    private bool navigatable = false;
+    public bool navigatable = false; //due arcontrolscr use
 
     void Awake()
     {
@@ -40,40 +42,105 @@ public class MainController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        /* observer zone */
-        if(appState != oldAppState)
+        /* observer zone, control state changing */
+        if (appState != oldAppState)
         {
             //call observer
-            canvasButton.ChangeActionBarColor();
+            canvasButton.OnAppStateChange();
             oldAppState = appState;
         }
+    }
 
-        if(beginPoint != oldBeginPoint)
+    #region SetPoint
+        
+    public void SetBeginPoint(GameObject beginPoint)
+    /* create started AR when camera detect marker */
+    {
+        if (beginPoint.GetComponent<MarkerData>() != null)
         {
-            if(appState == AppState.Idle)
-            {
-                canvasButton.ChangeActionText("อยู่ที่: "+beginPoint.GetComponent<MarkerData>().roomName);
-                if(destinationPoint != null){
-                    if(destinationPoint == beginPoint){
-                        canvasButton.ChangeActionText("ถึงแล้ว: "+beginPoint.GetComponent<MarkerData>().roomName);
-                    }
+            this.beginPoint = beginPoint;
+            Debug.Log("Set Begin Point to " + beginPoint.GetComponent<MarkerData>().roomName);
+        }
+        canvasButton.OnBeginPointChange(beginPoint);
+        switch (appState)
+        {
+            case AppState.Idle:
+                if (this.beginPoint != null && this.destinationPoint != null)       // already has destpoint
+                {
+                    NavigateIfNotSamePoint(); //dest not are this pos
                 }
-            }
-            else if(appState == AppState.Navigate)
-            {
-                canvasButton.ChangeActionText("กำลังไปยัง: "+destinationPoint.GetComponent<MarkerData>().roomName);
-            }
-            oldBeginPoint = beginPoint;
+                break;
+            case AppState.Navigate:         //beginpoint will not null, dest not null in nav
+                NavigateIfNotSamePoint();   //new pos not same dest
+                break;
+            default:
+                appState = AppState.Idle;
+                break;
         }
-
-        if(destinationPoint != oldDestinationPoint)
+        oldBeginPoint = beginPoint;
+        ShowAR(beginPoint); //remove if user can set
+    }
+    public void SetDestinationPoint(GameObject destinationPoint)
+    {
+        //if (destinationPoint.GetComponent<MarkerData>() != null)
+        //{
+            this.destinationPoint = destinationPoint;
+            //Debug.Log("Set Destination Point to " + destinationPoint.GetComponent<MarkerData>().roomName);
+        //}
+        canvasButton.OnDestinationPointChange(destinationPoint);
+        switch (appState)
         {
-            if(appState == AppState.Navigate)
-            {
-                canvasButton.ChangeActionText("กำลังไปยัง: "+destinationPoint.GetComponent<MarkerData>().roomName);
-            }
-            oldDestinationPoint = destinationPoint;
+            case AppState.Idle:
+                if (this.beginPoint != null && this.destinationPoint != null)   // already has begin point, start navigate
+                {
+                    NavigateIfNotSamePoint();
+                }
+                break;
+            case AppState.Navigate:
+                if (this.destinationPoint == null)
+                {
+                    appState = AppState.Idle;
+                }
+                else if (this.beginPoint != null && this.destinationPoint != null)   // already has begin point, start navigate
+                {
+                    NavigateIfNotSamePoint();       // select dest same as current point false
+                }
+                break;
+            default:
+                appState = AppState.Navigate;
+                break;
         }
+        oldDestinationPoint = destinationPoint;
+    }
+    public void ClearDestinationPoint()
+    {
+        SetDestinationPoint(null);
+        this.reachedPoint = null;
+        appState = AppState.Idle;
+    }
+
+    #endregion
+
+    #region Navigate
+        
+    private bool NavigateIfNotSamePoint()
+    /* check before navigate that two new point didn't met destination 
+    return true if two point didn't same room and go to navigate*/
+    {
+        if (this.beginPoint != null && this.destinationPoint != null)
+        {
+            if (this.beginPoint.GetComponent<MarkerData>().roomName
+                == this.destinationPoint.GetComponent<MarkerData>().roomName)
+            {
+                this.reachedPoint = this.destinationPoint;
+                this.destinationPoint = null;
+                appState = AppState.Idle;
+                return false;
+            }
+            appState = AppState.Navigate;
+            Navigate();
+        }
+        return true;
     }
 
     public void Navigate()
@@ -81,7 +148,6 @@ public class MainController : MonoBehaviour
 	if in same floor, navigate to connecttor of floor 
 	if can't find route, arrow will directly point to destination*/
     {
-        appState = AppState.Navigate;
         BuildingData building = this.beginPoint.GetComponent<MarkerData>()
                 .GetFloor().GetComponent<FloorData>()
                 .GetBuilding().GetComponent<BuildingData>();
@@ -89,10 +155,11 @@ public class MainController : MonoBehaviour
         if (building.IsSameFloor(this.beginPoint, this.destinationPoint))
         {
             Debug.Log("Same Floor  Navigating " + this.beginPoint.GetComponent<MarkerData>().floor);
-            if (this.beginPoint == this.destinationPoint)
+            if (this.beginPoint == this.destinationPoint) //                                <<<<< check room name
             {
                 Debug.Log("=== Founded Destination ===");
                 appState = AppState.Idle;
+                Debug.Log(" Reach at Main navigate and idle");
             }
             else if (dijsktra.FindShortestPath(this.beginPoint.GetComponent<MarkerData>().GetFloor(),
                   this.beginPoint, this.destinationPoint))
@@ -106,7 +173,7 @@ public class MainController : MonoBehaviour
         }
         else
         {
-            Debug.Log("Different Floor  Navigating " + this.beginPoint.GetComponent<MarkerData>().floor +" To " + this.destinationPoint.GetComponent<MarkerData>().floor);
+            Debug.Log("Different Floor  Navigating " + this.beginPoint.GetComponent<MarkerData>().floor + " To " + this.destinationPoint.GetComponent<MarkerData>().floor);
             bool begintoLift = dijsktra.FindShortestPath(
                     this.beginPoint.GetComponent<MarkerData>().GetFloor(),
                     this.beginPoint, building.GetConnector(this.beginPoint));
@@ -124,80 +191,53 @@ public class MainController : MonoBehaviour
         }
         //case point to null of successor
     }
+    #endregion
 
-    public void SetBeginPoint(GameObject beginPoint)
-    /* create started AR when camera detect marker */
-    {
-        if (beginPoint.GetComponent<MarkerData>() != null)
-        {
-            this.beginPoint = beginPoint;
-            Debug.Log("Set Begin Point to " + beginPoint.GetComponent<MarkerData>().roomName);
-        }
-        // not navigate here
-    }
-
+#region ShowAR
     //function recive prefabType loop all child if met active it and flag as met, if meet more than one destroy it
-
-    public void SetDestinationPoint(GameObject destinationPoint)
+    public void ShowAR(GameObject objectToAugment)
+    /* show AR depending on state, works with ArControlScript, navigate before show */
     {
-        if (destinationPoint.GetComponent<MarkerData>() != null)
-        {
-            this.destinationPoint = destinationPoint;
-            canvasButton.OnCloseSerch();
-            Debug.Log("Set Destination Point to " + destinationPoint.GetComponent<MarkerData>().roomName);
-        }
-
-    }
-
-    public void ShowAR() /* show AR depending on state, works with ArControlScript, navigate before show */
-    {
-        foreach (Transform child in this.beginPoint.transform)
+        ArControlScript arControl = objectToAugment.GetComponent<ArControlScript>();
+        foreach (Transform child in objectToAugment.transform)
         {
             child.gameObject.SetActive(false);
         }
 
         if (appState == AppState.Idle) //set desboard if not in old node or navigated to destination
         {
-			if(this.beginPoint != null && this.destinationPoint != null)
-			{
-				if (this.beginPoint.GetComponent<MarkerData>().roomName == this.destinationPoint.GetComponent<MarkerData>().roomName)
-				{
-					this.beginPoint.GetComponent<ArControlScript>().CreateCheckTrue();
-					appState = AppState.Idle;
-				}
-				else 
-				{
-					this.beginPoint.GetComponent<ArControlScript>().CreateDescriptionBoard();
-				}
-			}
-			else
-			{
-				this.beginPoint.GetComponent<ArControlScript>().CreateDescriptionBoard();
-			}
-        }
-        else if (appState == AppState.Navigate)  //set arrow
-        {
-            if (this.beginPoint.GetComponent<MarkerData>().roomName == this.destinationPoint.GetComponent<MarkerData>().roomName)
+            if (this.beginPoint != null && this.reachedPoint != null)
             {
-                this.beginPoint.GetComponent<ArControlScript>().CreateCheckTrue();
-                appState = AppState.Idle;
-            }
-            else //create arrow and point to next node/ 
-            {
-                this.beginPoint.GetComponent<ArControlScript>().CreateArrow();
-                if (navigatable)
+                if (objectToAugment.GetComponent<MarkerData>().roomName == this.reachedPoint.GetComponent<MarkerData>().roomName)
                 {
-					Debug.Log("point to " +this.beginPoint.GetComponent<MarkerData>().successor.GetComponent<MarkerData>().position);
-                    this.beginPoint.GetComponent<ArControlScript>().GetArrow().GetComponent<ArrowScript>()
-                            .PointToCoordinate(this.beginPoint.GetComponent<MarkerData>().successor.GetComponent<MarkerData>().position);
+                    arControl.CreateCheckTrue();
+                    Debug.Log(" Reach at Main ShowAR Idle Mode and idle");
                 }
                 else
                 {
-                    this.beginPoint.GetComponentInChildren<ArrowScript>()
-                            .PointToCoordinate(this.destinationPoint.GetComponent<MarkerData>().position);
+                    arControl.CreateDescriptionBoard();
                 }
+            }
+            else if (this.beginPoint != null)
+            {
+                arControl.CreateDescriptionBoard();
+            }
+        }
+        else if (appState == AppState.Navigate)  //set arrow
+        {
+            arControl.CreateArrow();
+            if (navigatable)
+            {
+                Debug.Log("point to " + objectToAugment.GetComponent<MarkerData>().successor.GetComponent<MarkerData>().position);
+                arControl.GetArrow().GetComponent<ArrowScript>().PointToCoordinate(
+                    objectToAugment.GetComponent<MarkerData>().successor.GetComponent<MarkerData>().position);
+            }
+            else
+            {
+                objectToAugment.GetComponentInChildren<ArrowScript>()
+                        .PointToCoordinate(this.destinationPoint.GetComponent<MarkerData>().position);
             }
         }
     }
-
+#endregion
 }

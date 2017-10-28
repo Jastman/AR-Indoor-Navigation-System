@@ -110,12 +110,13 @@ public class CanvasResolutionScript : MonoBehaviour {
 	}
 	public void SetClearButtonInSearch()
 	{
+		float clearButtonPadding = (actionBarHeight*0.15f);
 		clearButton.sizeDelta = new Vector2(actionBarHeight*0.3f, actionBarHeight*0.3f);
-		clearButton.anchoredPosition = new Vector2(((clearButton.sizeDelta.x/2) + (actionBarHeight*0.1f))*-1 , 0);
+		clearButton.anchoredPosition = new Vector2(((clearButton.sizeDelta.x/2) + clearButtonPadding)*-1 , 0);
 	}
 	public void SetSearchFieldInSearch()
 	{
-		searchInputField.sizeDelta = new Vector2(Screen.width - actionBarHeight - (actionBarHeight*0.5f), topButtonSize());
+		searchInputField.sizeDelta = new Vector2(Screen.width - actionBarHeight, topButtonSize());
 		searchInputField.anchoredPosition = new Vector2(searchInputField.sizeDelta.x/2 + actionBarHeight, 0);
 		foreach (Text tx in GetComponentsInChildren<Text>())
 		{

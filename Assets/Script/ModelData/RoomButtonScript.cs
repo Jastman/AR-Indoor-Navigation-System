@@ -4,8 +4,8 @@ using UnityEngine;
 
 public class RoomButtonScript : MonoBehaviour {
 
-	private GameObject mainController;
 	public GameObject room;
+	public bool isDestination = false;
 
 	// Use this for initialization
 	void Start () {
@@ -18,10 +18,15 @@ public class RoomButtonScript : MonoBehaviour {
 
 	public void SetDestination()
 	{
-		MainController.instance.SetDestinationPoint(room);
-		if(MainController.instance.beginPoint != null && MainController.instance.destinationPoint != null) {
-			MainController.instance.Navigate();
+		if(isDestination)
+		{
+			MainController.instance.ClearDestinationPoint();
 		}
+		else
+		{
+			MainController.instance.SetDestinationPoint(room);
+		}
+		gameObject.transform.root.GetComponent<CanvasButtonScript>().OnCloseSerch();
 	}
 
 	public void PrintName()

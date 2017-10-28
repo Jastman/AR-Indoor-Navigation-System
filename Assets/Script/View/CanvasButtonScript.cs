@@ -30,6 +30,9 @@ public class CanvasButtonScript : MonoBehaviour
     private Page page = Page.Main;
 
     private CanvasResolutionScript canvasResolutionScript;
+    private ToastMessageScript toastMessageScript;
+
+    private bool canQuitApp = true;
 
     // Use this for initialization
     void Start()
@@ -39,6 +42,9 @@ public class CanvasButtonScript : MonoBehaviour
         searchShowList = new List<GameObject>();
 
         canvasResolutionScript = gameObject.GetComponent<CanvasResolutionScript>();
+        toastMessageScript = gameObject.GetComponent<ToastMessageScript>();
+        toastMessageScript.showToastOnUiThread(UIValue.value.STRING_FINDMARKER);
+
         hambergerButton = actionBar.gameObject.transform.Find("HambergerButton").gameObject;
         mapButton = actionBar.gameObject.transform.Find("MapButton").gameObject;
         searchButton = actionBar.gameObject.transform.Find("SearchButton").gameObject;
@@ -71,16 +77,26 @@ public class CanvasButtonScript : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // switch (MainController.instance.appState)
-        // {
-        //     case MainController.AppState.Idle:
-        //         actionBar.GetComponent<Image>().color = new Color32(60, 126, 255, 255);
-        //         break;
-        //     case MainController.AppState.Navigate:
-        //         actionBar.GetComponent<Image>().color = new Color32(126, 60, 255, 255);
-        //         break;
-        //     default: actionBar.GetComponent<Image>().color = new Color32(60, 126, 255, 255); break;
-        // }
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            switch (page)
+            {
+                case Page.Search: OnCloseSerch(); break;
+                case Page.Map: OnCloseMap(); break;
+                case Page.Main:
+                    if (canQuitApp)
+                    {
+                        Application.Quit();
+                    }
+                    else
+                    {
+                        canQuitApp = true;
+                        //showToast
+                    }
+                    break;
+                default: OnCloseSerch(); break;
+            }
+        }
     }
 
     public void OnBackButton()
@@ -186,7 +202,117 @@ public class CanvasButtonScript : MonoBehaviour
     }
     #endregion
 
+    #region State From Main
+
     // may move these public function
+
+    //recive from MainController, may be implement from callback
+    public void OnAppStateChange()
+    {
+        ChangeActionBarColor();
+    }
+    public void OnBeginPointChange(GameObject bpoint)
+    {
+        GameObject dpoint = MainController.instance.destinationPoint;
+        if (MainController.instance.appState == MainController.AppState.Idle)
+        {
+            ChangeActionText("อยู่ที่: " + bpoint.GetComponent<MarkerData>().roomName);
+            toastMessageScript.showToastOnUiThread(
+                    UIValue.value.STRING_CURRENT_POSITION + bpoint.GetComponent<MarkerData>().roomName);
+            if (MainController.instance.reachedPoint != null)
+            {
+                if (bpoint.GetComponent<MarkerData>().roomName ==
+                    MainController.instance.reachedPoint.GetComponent<MarkerData>().roomName)
+                {
+                    ChangeActionText("ถึงแล้ว: " + bpoint.GetComponent<MarkerData>().roomName);
+                    toastMessageScript.showToastOnUiThread(
+                        UIValue.value.STRING_REACH_DESTINATION + bpoint.GetComponent<MarkerData>().roomName + "แล้ว");
+                    Debug.Log(" Reach at Main ShowAR Idle Mode and idle");
+                }
+            }
+            else if (dpoint == null)
+            {
+                ChangeActionText("AR Indoor Navigation System");
+                toastMessageScript.showToastOnUiThread(UIValue.value.STRING_SELECTDEST);
+            }
+        }
+        else if (MainController.instance.appState == MainController.AppState.Navigate)
+        {
+            if (bpoint.GetComponent<MarkerData>().roomName == dpoint.GetComponent<MarkerData>().roomName)
+            {
+                ChangeActionText("ถึงแล้ว: " + bpoint.GetComponent<MarkerData>().roomName);
+                toastMessageScript.showToastOnUiThread(
+                    UIValue.value.STRING_REACH_DESTINATION + bpoint.GetComponent<MarkerData>().roomName + "แล้ว");
+                Debug.Log(" Reach at Main ShowAR Idle Mode and idle");
+            }
+            else
+            {
+                ChangeActionText("ไปยัง: " + dpoint.GetComponent<MarkerData>().roomName);
+                toastMessageScript.showToastOnUiThread(
+                        UIValue.value.STRING_CURRENT_POSITION + bpoint.GetComponent<MarkerData>().roomName);
+            }
+
+        }
+    }
+    public void OnDestinationPointChange(GameObject dpoint)
+    {
+        GameObject bpoint = MainController.instance.beginPoint;
+        GameObject rpoint = MainController.instance.reachedPoint;
+        if (MainController.instance.appState == MainController.AppState.Idle)
+        {
+            //dpoint change to null in idle
+            if (bpoint == null)
+            {
+                ChangeActionText("ต้องการไปยัง: " + dpoint.GetComponent<MarkerData>().roomName);
+                toastMessageScript.showToastOnUiThread(UIValue.value.STRING_FINDMARKER);
+            }
+            if (bpoint != null && dpoint != null) //
+            {
+                if (bpoint.GetComponent<MarkerData>().roomName == dpoint.GetComponent<MarkerData>().roomName)
+                {
+                    ChangeActionText("ถึงแล้ว: " + bpoint.GetComponent<MarkerData>().roomName);
+                    toastMessageScript.showToastOnUiThread(
+                        UIValue.value.STRING_REACH_DESTINATION + bpoint.GetComponent<MarkerData>().roomName + "แล้ว");
+                    Debug.Log(" Reach at Main ShowAR Idle Mode and idle");
+                }
+                else
+                {
+                    ChangeActionText("ไปยัง: " + dpoint.GetComponent<MarkerData>().roomName);
+                    toastMessageScript.showToastOnUiThread(
+                            UIValue.value.STRING_CHANGE_DESTINATION + dpoint.GetComponent<MarkerData>().roomName + "แล้ว");
+                }
+            }
+            else
+            {
+                ChangeActionText("ไปยัง: " + dpoint.GetComponent<MarkerData>().roomName);
+                toastMessageScript.showToastOnUiThread(
+                        UIValue.value.STRING_CHANGE_DESTINATION + dpoint.GetComponent<MarkerData>().roomName + " แล้ว "
+                        + UIValue.value.STRING_TOCANCLE_NAVIGATE);
+            }
+        }
+        else if (MainController.instance.appState == MainController.AppState.Navigate)
+        {
+            if (dpoint == null)
+            {
+                ChangeActionText("อยู่ที่: " + bpoint.GetComponent<MarkerData>().roomName);
+                toastMessageScript.showToastOnUiThread(UIValue.value.STRING_REVOKE_NAVIGATE);
+            }
+            else if (bpoint.GetComponent<MarkerData>().roomName == dpoint.GetComponent<MarkerData>().roomName)
+            {
+                ChangeActionText("ถึงแล้ว: " + bpoint.GetComponent<MarkerData>().roomName);
+                toastMessageScript.showToastOnUiThread(
+                    UIValue.value.STRING_REACH_DESTINATION + bpoint.GetComponent<MarkerData>().roomName + "แล้ว");
+                Debug.Log(" Reach at Main ShowAR Idle Mode and idle");
+            }
+            else
+            {
+                ChangeActionText("ไปยัง: " + dpoint.GetComponent<MarkerData>().roomName);
+                toastMessageScript.showToastOnUiThread(
+                        UIValue.value.STRING_CHANGE_DESTINATION + dpoint.GetComponent<MarkerData>().roomName);
+            }
+        }
+    }
+    //used by above
     public void ChangeActionBarColor() //OnAppStateChange
     {
         switch (MainController.instance.appState)
@@ -201,10 +327,15 @@ public class CanvasButtonScript : MonoBehaviour
         }
     }
 
-	public void ChangeActionText(string actext)
-	{
-		appName.GetComponent<Text>().text = actext;
-	}
+    public void ChangeActionText(string actext)
+    {
+        appName.GetComponent<Text>().text = actext;
+    }
+
+    #endregion
+
+
+    #region Search Action
 
     public void OnTyping()
     {
@@ -249,7 +380,6 @@ public class CanvasButtonScript : MonoBehaviour
         bool beginColored = !(MainController.instance.beginPoint != null);
         bool destColored = !(MainController.instance.destinationPoint != null);
         //destroy all list
-        Debug.Log(searchContent.transform.childCount);
         foreach (Transform ch in searchContent.transform)
         {
             Destroy(ch.gameObject);
@@ -267,7 +397,9 @@ public class CanvasButtonScript : MonoBehaviour
             {
                 if (MainController.instance.beginPoint.GetComponent<MarkerData>().roomName == markerdata.roomName)
                 {
-                    roomButton.GetComponent<Image>().color = new Color32(224, 224, 224, 255); // gray
+                    roomButtonText.text = "ต้นทาง: " + markerdata.roomName;
+                    roomButtonText.fontStyle = FontStyle.Bold;
+                    roomButtonText.fontSize = canvasResolutionScript.GetScaledFontSize(47); // gray
                     beginColored = true;
                 }
             }
@@ -275,12 +407,17 @@ public class CanvasButtonScript : MonoBehaviour
             {
                 if (MainController.instance.destinationPoint.GetComponent<MarkerData>().roomName == markerdata.roomName)
                 {
+                    roomButton.GetComponent<RoomButtonScript>().isDestination = true;
                     roomButton.GetComponent<Image>().color = new Color32(126, 60, 255, 255); // purple
+                    roomButtonText.text = "ปลายทาง: " + markerdata.roomName;
                     destColored = true;
                 }
             }
         }
     }
+    #endregion
+
+    #region Map Action
 
     public void OnShiftMap(bool isForward)
     {
@@ -460,5 +597,6 @@ public class CanvasButtonScript : MonoBehaviour
         ));
     }
 
+    #endregion
 
 }

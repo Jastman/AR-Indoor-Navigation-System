@@ -70,12 +70,12 @@ public class TempButtonScript : MonoBehaviour {
 		foreach (TrackableBehaviour tr in trackableList)
 		{
 			MainController.instance.SetBeginPoint(tr.gameObject);
-			if(MainController.instance.beginPoint != null && MainController.instance.destinationPoint != null) {
-				MainController.instance.Navigate();
-				Debug.Log("Navigate");
-			}
-			MainController.instance.ShowAR();
 		}
 		
+	}
+
+	public void ShoeToast()
+	{
+		gameObject.GetComponent<ToastMessageScript>().showToastOnUiThread("Loooooooooooooooooooooooooooooogn text");
 	}
 }
