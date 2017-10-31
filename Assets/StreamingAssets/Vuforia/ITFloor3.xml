@@ -1,6 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
   <Tracking>
+    <ImageTarget name="Marker331-b" size="10.000000 13.293769" />
+    <ImageTarget name="Marker329-b" size="10.000000 13.785961" />
+    <ImageTarget name="Marker308-f" size="8.000000 9.745325" />
+    <ImageTarget name="Marker316-f" size="7.000000 7.407767" />
+    <ImageTarget name="Marker316-b" size="7.000000 6.407166" />
+    <ImageTarget name="Marker317" size="8.000000 6.861469" />
+    <ImageTarget name="Marker328-b" size="7.000000 5.984838" />
+    <ImageTarget name="Marker332-f" size="10.000000 13.276381" />
+    <ImageTarget name="Marker321" size="10.000000 10.893697" />
+    <ImageTarget name="Marker320" size="8.000000 6.780269" />
+    <ImageTarget name="Marker304-f" size="10.000000 10.872818" />
+    <ImageTarget name="Marker304-b" size="10.000000 10.621806" />
+    <ImageTarget name="Marker306-f" size="10.000000 10.285234" />
     <ImageTarget name="MarkerLF3" size="3.000000 2.124103" />
     <ImageTarget name="Markerf3-5" size="5.000000 7.619318" />
     <ImageTarget name="Markerf3-4" size="5.000000 7.220421" />
@@ -18,7 +31,6 @@
     <ImageTarget name="Marker330-f" size="10.000000 17.024128" />
     <ImageTarget name="Marker330-b" size="10.000000 16.361631" />
     <ImageTarget name="Marker329-f" size="10.000000 11.474501" />
-    <ImageTarget name="Marker329-b" size="10.000000 12.397790" />
     <ImageTarget name="Marker328" size="8.000000 10.644490" />
     <ImageTarget name="Marker316" size="5.000000 4.256487" />
     <ImageTarget name="Marker308-b" size="10.000000 9.227053" />
@@ -26,7 +38,6 @@
     <ImageTarget name="Marker306-m" size="2.000000 0.668073" />
     <ImageTarget name="Marker306" size="10.000000 10.080646" />
     <ImageTarget name="Marker304-m" size="2.000000 0.405797" />
-    <ImageTarget name="Marker304-f" size="10.000000 6.136900" />
     <ImageTarget name="Marker3s" size="5.000000 3.518692" />
   </Tracking>
 </QCARConfig>
