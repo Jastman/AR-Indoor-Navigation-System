@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
+  <Tracking>
+    <ImageTarget name="L3" size="5.000000 7.038719" />
+    <ImageTarget name="431m" size="1.000000 0.577197" />
+    <ImageTarget name="431f" size="1.000000 0.577197" />
+    <ImageTarget name="423" size="1.000000 0.556418" />
+    <ImageTarget name="400" size="1.000000 0.504551" />
+    <ImageTarget name="334-f" size="8.000000 12.565928" />
+    <ImageTarget name="334-b" size="8.000000 14.904943" />
+    <ImageTarget name="333-f" size="8.000000 9.619663" />
+    <ImageTarget name="333-b" size="8.000000 9.756900" />
+    <ImageTarget name="332-f" size="8.000000 8.958302" />
+    <ImageTarget name="332-b" size="8.000000 10.268042" />
+    <ImageTarget name="331-f" size="8.000000 8.100055" />
+    <ImageTarget name="331-b" size="8.000000 8.389308" />
+    <ImageTarget name="326" size="8.000000 9.113636" />
+    <ImageTarget name="325" size="8.000000 11.176715" />
+    <ImageTarget name="323-f" size="8.000000 9.270486" />
+    <ImageTarget name="324-f" size="8.000000 11.142250" />
+    <ImageTarget name="323-b" size="8.000000 9.720492" />
+    <ImageTarget name="322-f" size="8.000000 9.627878" />
+    <ImageTarget name="322-b" size="8.000000 9.379569" />
+    <ImageTarget name="321-f" size="8.000000 7.884567" />
+    <ImageTarget name="321-b" size="8.000000 8.000000" />
+    <ImageTarget name="310" size="4.000000 2.732122" />
+    <ImageTarget name="4G2" size="5.000000 1.598597" />
+    <ImageTarget name="4G" size="4.000000 0.898367" />
+    <ImageTarget name="4BnB" size="4.000000 0.795156" />
+    <ImageTarget name="4aG" size="6.000000 4.913117" />
+  </Tracking>
+</QCARConfig>
