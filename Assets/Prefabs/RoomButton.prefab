@@ -59,6 +59,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   room: {fileID: 0}
+  isDestination: 0
 --- !u!114 &114655272493319190
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -99,7 +100,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls:
       - m_Target: {fileID: 114182327663528642}
-        m_MethodName: SetDestination
+        m_MethodName: OpenRoomDialog
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}

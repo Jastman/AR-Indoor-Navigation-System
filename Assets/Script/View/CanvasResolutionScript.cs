@@ -101,7 +101,6 @@ public class CanvasResolutionScript : MonoBehaviour {
 	}
 	#endregion
 
-	
 	#region Set Search UI
 	public void SetBackButtonInSearch()
 	{
@@ -185,7 +184,7 @@ public class CanvasResolutionScript : MonoBehaviour {
 	#endregion
 	
 
-
+	#region Size Calculation 
 	/* Button size Calculation */
 	private float topButtonSize()
 	{
@@ -270,4 +269,5 @@ public class CanvasResolutionScript : MonoBehaviour {
 	{
 		return dp * (Screen.dpi/160f);
 	}
+	#endregion
 }

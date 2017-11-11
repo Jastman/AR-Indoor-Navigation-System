@@ -14,7 +14,8 @@ public class CanvasButtonScript : MonoBehaviour
     private GameObject searchInputField, appName; //InputFields + text
     private Text appNameText;
 
-    private GameObject searchHelpText, searchList, viewPort, scrollbar, searchContent;
+    private GameObject searchHelpText, searchList, viewPort, scrollbar, searchContent, roomDataPanel, roomDataDialog;
+    private GameObject roomNameTitle, roomMapImage, roomDesData, roomNavigateButton;
     private GameObject mapImage, rightButton, leftButton, navline, userDot;
 
     private BuildingData building;
@@ -61,6 +62,12 @@ public class CanvasButtonScript : MonoBehaviour
         viewPort = searchList.gameObject.transform.Find("Viewport").gameObject;
         scrollbar = searchList.gameObject.transform.Find("Scrollbar Vertical").gameObject;
         searchContent = viewPort.gameObject.transform.Find("Content").gameObject;
+        roomDataPanel = searchPanel.transform.Find("RoomDataPanel").gameObject;
+        roomDataDialog = roomDataPanel.transform.Find("RoomDataDialog").gameObject;
+        roomNameTitle = roomDataDialog.transform.Find("RoomNameTitle").gameObject;
+        roomMapImage = roomDataDialog.transform.Find("RoomMapImage").gameObject;
+        roomDesData = roomDataDialog.transform.Find("RoomData").gameObject;
+        roomNavigateButton = roomDataDialog.transform.Find("NavigateButton").gameObject;
 
         /* map */
         mapImage = mapPanel.transform.Find("MapImage").gameObject;
@@ -109,6 +116,11 @@ public class CanvasButtonScript : MonoBehaviour
         }
     }
 
+    public void DummyOnclickFunction()
+    {
+        Debug.Log("Dummy");
+    }
+
     #region Open New Page
 
     public void OnOpenSerch()
@@ -120,6 +132,7 @@ public class CanvasButtonScript : MonoBehaviour
         mapButton.SetActive(false);
         searchButton.SetActive(false);
         appName.SetActive(false);
+        roomDataPanel.SetActive(false);
 
         backButton.SetActive(true);
         searchInputField.SetActive(true);
@@ -144,6 +157,7 @@ public class CanvasButtonScript : MonoBehaviour
         mapButton.SetActive(true);
         searchButton.SetActive(true);
         appName.SetActive(true);
+        roomDataPanel.SetActive(false);
 
         backButton.SetActive(false);
         searchInputField.SetActive(false);
@@ -164,6 +178,7 @@ public class CanvasButtonScript : MonoBehaviour
         mapButton.SetActive(false);
         searchButton.SetActive(false);
         appName.SetActive(true);
+        roomDataPanel.SetActive(false);
 
         backButton.SetActive(true);
         searchInputField.SetActive(false);
@@ -190,6 +205,7 @@ public class CanvasButtonScript : MonoBehaviour
         mapButton.SetActive(true);
         searchButton.SetActive(true);
         appName.SetActive(true);
+        roomDataPanel.SetActive(false);
 
         backButton.SetActive(false);
         searchInputField.SetActive(false);
@@ -200,6 +216,48 @@ public class CanvasButtonScript : MonoBehaviour
         canvasResolutionScript.SetSearchButtonInMain();
         canvasResolutionScript.SetAppNameInMain();
     }
+
+    public void OnOpenRoomDialoge(GameObject roomObj, bool isDestination)
+    /* show room dialoge box data with map */
+    {
+        MarkerData mkdt = roomObj.GetComponent<MarkerData>();
+        roomDataPanel.SetActive(true);
+        roomNameTitle.GetComponent<Text>().text = "ข้อมูลห้อง: " + mkdt.roomName;
+        Material floorMaterial = mkdt.GetFloor().transform.GetChild(0).gameObject.GetComponent<MeshRenderer>().materials[0];
+        roomMapImage.GetComponent<Image>().material = floorMaterial;
+        roomDesData.GetComponent<Text>().text = mkdt.description;
+        if (!isDestination)
+        {
+            roomNavigateButton.transform.GetChild(0).gameObject.GetComponent<Text>().text = "Navigate.";
+            roomNavigateButton.GetComponent<Button>().onClick.AddListener(delegate { SelectToNavigate(roomObj); });
+        }
+        else
+        {
+            roomNavigateButton.transform.GetChild(0).gameObject.GetComponent<Text>().text = "Cancle Navigate";
+            roomNavigateButton.GetComponent<Button>().onClick.AddListener(MainController.instance.ClearDestinationPoint);
+        }
+
+        //mark point and navigate draw line to destination
+        GameObject destDot = roomMapImage.transform.Find("MarkDot/DestMarker").gameObject;
+        destDot.GetComponent<RectTransform>().anchoredPosition = new Vector2(
+            mkdt.position.x * (roomMapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+            mkdt.position.z * (roomMapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+        );
+
+    }
+
+    public void OnCloseRoomDialog()
+    {
+        roomDataPanel.SetActive(false);
+    }
+
+    private void SelectToNavigate(GameObject roomObj)
+    {
+        MainController.instance.SetDestinationPoint(roomObj);
+        OnCloseRoomDialog();
+        OnCloseSerch();
+    }
+
     #endregion
 
     #region State From Main
@@ -211,6 +269,7 @@ public class CanvasButtonScript : MonoBehaviour
     {
         ChangeActionBarColor();
     }
+
     public void OnBeginPointChange(GameObject bpoint)
     {
         GameObject dpoint = MainController.instance.destinationPoint;
@@ -312,6 +371,7 @@ public class CanvasButtonScript : MonoBehaviour
             }
         }
     }
+
     //used by above
     public void ChangeActionBarColor() //OnAppStateChange
     {

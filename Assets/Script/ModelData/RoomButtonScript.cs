@@ -16,17 +16,19 @@ public class RoomButtonScript : MonoBehaviour {
 		
 	}
 
-	public void SetDestination()
+	public void OpenRoomDialog()
 	{
-		if(isDestination)
-		{
-			MainController.instance.ClearDestinationPoint();
-		}
-		else
-		{
-			MainController.instance.SetDestinationPoint(room);
-		}
-		gameObject.transform.root.GetComponent<CanvasButtonScript>().OnCloseSerch();
+		// if(isDestination)
+		// {
+			
+		// 	MainController.instance.ClearDestinationPoint();
+		// }
+		// else
+		// {
+		// 	MainController.instance.SetDestinationPoint(room);
+		// }
+		gameObject.transform.root.GetComponent<CanvasButtonScript>().OnOpenRoomDialoge(room, isDestination);
+		//gameObject.transform.root.GetComponent<CanvasButtonScript>().OnCloseSerch();
 	}
 
 	public void PrintName()
