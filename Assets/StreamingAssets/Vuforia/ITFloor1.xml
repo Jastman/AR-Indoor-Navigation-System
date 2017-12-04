@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <QCARConfig xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="qcar_config.xsd">
   <Tracking>
+    <ImageTarget name="MarkerAudi" size="12.000000 7.068262" />
+    <ImageTarget name="MarkerM15" size="7.000000 6.404655" />
     <ImageTarget name="MarkerM13" size="7.000000 5.703704" />
     <ImageTarget name="MarkerM12" size="7.000000 12.828294" />
     <ImageTarget name="MarkerM04-f" size="10.000000 10.996884" />

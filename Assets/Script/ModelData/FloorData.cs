@@ -51,5 +51,13 @@ public class FloorData : MonoBehaviour {
 		return this.transform.parent.gameObject;
 	}
 
-	
+	public GameObject GetConnector() /* no attribute, return first connector on list */
+	{
+		return connectorList[0];
+	}
+
+	public GameObject GetConnector(GameObject node) /* has node, Get Nearest connector object | Fix later */
+	{
+		return GetConnector();
+	}
 }
