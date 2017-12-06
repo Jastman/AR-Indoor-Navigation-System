@@ -8,6 +8,7 @@ public class MainController : MonoBehaviour
     public static MainController instance;
     private DijsktraAlgorithm dijsktra;
     private CanvasButtonScript canvasButton;
+    private ShowStateManager showState;
     private CanvasResolutionScript canvasResolution;
     public GameObject beginPoint = null;
     public GameObject destinationPoint = null;
@@ -31,6 +32,7 @@ public class MainController : MonoBehaviour
             dijsktra = new DijsktraAlgorithm();
             canvasButton = GameObject.Find("Canvas").GetComponent<CanvasButtonScript>();
             canvasResolution = GameObject.Find("Canvas").GetComponent<CanvasResolutionScript>();
+            showState = GameObject.Find("Canvas").GetComponent<ShowStateManager>();
         }
         else if (instance != this)
         {
@@ -46,7 +48,6 @@ public class MainController : MonoBehaviour
         if (appState != oldAppState)
         {
             //call observer
-            canvasButton.OnAppStateChange();
             oldAppState = appState;
         }
     }
@@ -61,7 +62,7 @@ public class MainController : MonoBehaviour
             this.beginPoint = beginPoint;
             Debug.Log("Set Begin Point to " + beginPoint.GetComponent<MarkerData>().roomName);
         }
-        canvasButton.OnBeginPointChange(beginPoint);
+        //canvasButton.OnBeginPointChange(beginPoint);
         switch (appState)
         {
             case AppState.Idle:
@@ -77,6 +78,7 @@ public class MainController : MonoBehaviour
                 appState = AppState.Idle;
                 break;
         }
+        showState.OnBeginPointChange(beginPoint);
         oldBeginPoint = beginPoint;
         ShowAR(beginPoint); //remove if user can set
     }
@@ -87,7 +89,7 @@ public class MainController : MonoBehaviour
             this.destinationPoint = destinationPoint;
             //Debug.Log("Set Destination Point to " + destinationPoint.GetComponent<MarkerData>().roomName);
         //}
-        canvasButton.OnDestinationPointChange(destinationPoint);
+        //canvasButton.OnDestinationPointChange(destinationPoint);
         switch (appState)
         {
             case AppState.Idle:
@@ -110,6 +112,7 @@ public class MainController : MonoBehaviour
                 appState = AppState.Navigate;
                 break;
         }
+        showState.OnDestinationPointChange(destinationPoint);
         oldDestinationPoint = destinationPoint;
     }
     public void ClearDestinationPoint()

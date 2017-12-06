@@ -44,7 +44,7 @@ public class CanvasButtonScript : MonoBehaviour
 
         canvasResolutionScript = gameObject.GetComponent<CanvasResolutionScript>();
         toastMessageScript = gameObject.GetComponent<ToastMessageScript>();
-        toastMessageScript.showToastOnUiThread(UIValue.value.STRING_FINDMARKER);
+        toastMessageScript.showToastOnUiThread("ส่องกล้องไปยังจุดต่างๆ เช่น ป้ายบอกทาง เลขห้อง เพื่อเริ่มต้นระบุตำแหน่งของคุณ", false);
 
         hambergerButton = actionBar.gameObject.transform.Find("HambergerButton").gameObject;
         mapButton = actionBar.gameObject.transform.Find("MapButton").gameObject;
@@ -229,12 +229,25 @@ public class CanvasButtonScript : MonoBehaviour
         if (!isDestination)
         {
             roomNavigateButton.transform.GetChild(0).gameObject.GetComponent<Text>().text = "Navigate.";
+            roomNavigateButton.GetComponent<Button>().onClick.RemoveAllListeners();
             roomNavigateButton.GetComponent<Button>().onClick.AddListener(delegate { SelectToNavigate(roomObj); });
+            if(MainController.instance.beginPoint != null)
+            {
+                if(mkdt.roomName == MainController.instance.beginPoint.GetComponent<MarkerData>().roomName)
+                {
+                    roomNavigateButton.transform.GetChild(0).gameObject.GetComponent<Text>().text = "Here is Current Room";
+                    roomNavigateButton.GetComponent<Button>().onClick.RemoveAllListeners();
+                    roomNavigateButton.GetComponent<Button>().onClick.AddListener(delegate { 
+                        toastMessageScript.showToastOnUiThread("จุดล่าสุดของคุณคือจุดที่คุณเลือก กรุณาเลือกปลายทางที่อื่น", true);
+                        });
+                }
+            }
         }
         else
         {
             roomNavigateButton.transform.GetChild(0).gameObject.GetComponent<Text>().text = "Cancle Navigate";
-            roomNavigateButton.GetComponent<Button>().onClick.AddListener(MainController.instance.ClearDestinationPoint);
+            roomNavigateButton.GetComponent<Button>().onClick.RemoveAllListeners();
+            roomNavigateButton.GetComponent<Button>().onClick.AddListener(ClearPoint);
         }
 
         //mark point and navigate draw line to destination
@@ -258,142 +271,15 @@ public class CanvasButtonScript : MonoBehaviour
         OnCloseSerch();
     }
 
-    #endregion
-
-    #region State From Main
-
-    // may move these public function
-
-    //recive from MainController, may be implement from callback
-    public void OnAppStateChange()
+    private void ClearPoint()
     {
-        ChangeActionBarColor();
-    }
-
-    public void OnBeginPointChange(GameObject bpoint)
-    {
-        GameObject dpoint = MainController.instance.destinationPoint;
-        if (MainController.instance.appState == MainController.AppState.Idle)
-        {
-            ChangeActionText("อยู่ที่: " + bpoint.GetComponent<MarkerData>().roomName);
-            toastMessageScript.showToastOnUiThread(
-                    UIValue.value.STRING_CURRENT_POSITION + bpoint.GetComponent<MarkerData>().roomName);
-            if (MainController.instance.reachedPoint != null)
-            {
-                if (bpoint.GetComponent<MarkerData>().roomName ==
-                    MainController.instance.reachedPoint.GetComponent<MarkerData>().roomName)
-                {
-                    ChangeActionText("ถึงแล้ว: " + bpoint.GetComponent<MarkerData>().roomName);
-                    toastMessageScript.showToastOnUiThread(
-                        UIValue.value.STRING_REACH_DESTINATION + bpoint.GetComponent<MarkerData>().roomName + "แล้ว");
-                    Debug.Log(" Reach at Main ShowAR Idle Mode and idle");
-                }
-            }
-            else if (dpoint == null)
-            {
-                ChangeActionText("AR Indoor Navigation System");
-                toastMessageScript.showToastOnUiThread(UIValue.value.STRING_SELECTDEST);
-            }
-        }
-        else if (MainController.instance.appState == MainController.AppState.Navigate)
-        {
-            if (bpoint.GetComponent<MarkerData>().roomName == dpoint.GetComponent<MarkerData>().roomName)
-            {
-                ChangeActionText("ถึงแล้ว: " + bpoint.GetComponent<MarkerData>().roomName);
-                toastMessageScript.showToastOnUiThread(
-                    UIValue.value.STRING_REACH_DESTINATION + bpoint.GetComponent<MarkerData>().roomName + "แล้ว");
-                Debug.Log(" Reach at Main ShowAR Idle Mode and idle");
-            }
-            else
-            {
-                ChangeActionText("ไปยัง: " + dpoint.GetComponent<MarkerData>().roomName);
-                toastMessageScript.showToastOnUiThread(
-                        UIValue.value.STRING_CURRENT_POSITION + bpoint.GetComponent<MarkerData>().roomName);
-            }
-
-        }
-    }
-    public void OnDestinationPointChange(GameObject dpoint)
-    {
-        GameObject bpoint = MainController.instance.beginPoint;
-        GameObject rpoint = MainController.instance.reachedPoint;
-        if (MainController.instance.appState == MainController.AppState.Idle)
-        {
-            //dpoint change to null in idle
-            if (bpoint == null)
-            {
-                ChangeActionText("ต้องการไปยัง: " + dpoint.GetComponent<MarkerData>().roomName);
-                toastMessageScript.showToastOnUiThread(UIValue.value.STRING_FINDMARKER);
-            }
-            if (bpoint != null && dpoint != null) //
-            {
-                if (bpoint.GetComponent<MarkerData>().roomName == dpoint.GetComponent<MarkerData>().roomName)
-                {
-                    ChangeActionText("ถึงแล้ว: " + bpoint.GetComponent<MarkerData>().roomName);
-                    toastMessageScript.showToastOnUiThread(
-                        UIValue.value.STRING_REACH_DESTINATION + bpoint.GetComponent<MarkerData>().roomName + "แล้ว");
-                    Debug.Log(" Reach at Main ShowAR Idle Mode and idle");
-                }
-                else
-                {
-                    ChangeActionText("ไปยัง: " + dpoint.GetComponent<MarkerData>().roomName);
-                    toastMessageScript.showToastOnUiThread(
-                            UIValue.value.STRING_CHANGE_DESTINATION + dpoint.GetComponent<MarkerData>().roomName + "แล้ว");
-                }
-            }
-            else
-            {
-                ChangeActionText("ไปยัง: " + dpoint.GetComponent<MarkerData>().roomName);
-                toastMessageScript.showToastOnUiThread(
-                        UIValue.value.STRING_CHANGE_DESTINATION + dpoint.GetComponent<MarkerData>().roomName + " แล้ว "
-                        + UIValue.value.STRING_TOCANCLE_NAVIGATE);
-            }
-        }
-        else if (MainController.instance.appState == MainController.AppState.Navigate)
-        {
-            if (dpoint == null)
-            {
-                ChangeActionText("อยู่ที่: " + bpoint.GetComponent<MarkerData>().roomName);
-                toastMessageScript.showToastOnUiThread(UIValue.value.STRING_REVOKE_NAVIGATE);
-            }
-            else if (bpoint.GetComponent<MarkerData>().roomName == dpoint.GetComponent<MarkerData>().roomName)
-            {
-                ChangeActionText("ถึงแล้ว: " + bpoint.GetComponent<MarkerData>().roomName);
-                toastMessageScript.showToastOnUiThread(
-                    UIValue.value.STRING_REACH_DESTINATION + bpoint.GetComponent<MarkerData>().roomName + "แล้ว");
-                Debug.Log(" Reach at Main ShowAR Idle Mode and idle");
-            }
-            else
-            {
-                ChangeActionText("ไปยัง: " + dpoint.GetComponent<MarkerData>().roomName);
-                toastMessageScript.showToastOnUiThread(
-                        UIValue.value.STRING_CHANGE_DESTINATION + dpoint.GetComponent<MarkerData>().roomName);
-            }
-        }
-    }
-
-    //used by above
-    public void ChangeActionBarColor() //OnAppStateChange
-    {
-        switch (MainController.instance.appState)
-        {
-            case MainController.AppState.Idle:
-                actionBar.GetComponent<Image>().color = new Color32(60, 126, 255, 255);
-                break;
-            case MainController.AppState.Navigate:
-                actionBar.GetComponent<Image>().color = new Color32(126, 60, 255, 255);
-                break;
-            default: actionBar.GetComponent<Image>().color = new Color32(60, 126, 255, 255); break;
-        }
-    }
-
-    public void ChangeActionText(string actext)
-    {
-        appName.GetComponent<Text>().text = actext;
+        MainController.instance.ClearDestinationPoint();
+        OnCloseRoomDialog();
+        OnCloseSerch();
     }
 
     #endregion
-
+    
 
     #region Search Action
 
