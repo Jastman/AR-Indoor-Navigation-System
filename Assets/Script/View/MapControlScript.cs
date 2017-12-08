@@ -3,18 +3,25 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using UnityEngine.UI.Extensions;
 
 public class MapControlScript : MonoBehaviour, IPointerClickHandler
 {
 
     public GameObject mapImageObject;
+    public GameObject markerPrefab;
+    private GameObject navline, userDot;
     private int tabCount = 0;
     private float maxDoubleTabTime = 0.3f;
     private float newTime;
     private float zoomSpeed = 0.5f;
     private bool IsNormalSize;
     private bool hasMovedFlag = false;
+    private bool isUserInThisFloor = false;
     float mapPadding = 30f;
+
+    private GameObject[] nodeForLineArr = new GameObject[3];
+    private GameObject showingFloor;
 
     RectTransform mapImage;
 
@@ -28,37 +35,19 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
     // Update is called once per frame
     void Update()
     {
-        // if (Input.GetMouseButtonUp(0))
-        // {
-        //     tabCount += 1;
-        //     if (tabCount == 1)
-        //     {
-        //         newTime = Time.time + maxDoubleTabTime;
-        //     }
-        //     else if (tabCount == 2 && Time.time <= newTime)
-        //     {
-        //         if(!IsNormalSize)
-        //         {
-        //             RestoreMap();
-        //         }
-        //         else
-        //         {
-        //             ZoomMap();
-        //         }
-        //         //Whatever you want after a dubble tap    
-        //         print("Dubble tap");
-        //         tabCount = 0;
-        //     }
-        // }
-
-
         if (Input.touchCount == 2)
         {
             //condition that 2 finger once in map
-            Debug.Log("2 Touch" + Input.GetTouch(0).phase + "|" + Input.GetTouch(1).phase );
+            Debug.Log("2 Touch" + Input.GetTouch(0).phase + "|" + Input.GetTouch(1).phase);
             ZoomMap();
         }
-        else if (Input.touchCount == 1)
+    }
+
+    public void OnPointerClick(PointerEventData eventData)
+    //implement from ipointerclickhandler for click one time only
+    {
+        Debug.Log("It's me: " + name);
+        if (Input.touchCount == 1)
         {
             Touch touch = Input.GetTouch(0);
             //Debug.Log("  hasmoved:" +hasMovedFlag + " |" +touch.phase);
@@ -68,7 +57,7 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
             }
             if (touch.phase == TouchPhase.Ended)
             {
-                if(!hasMovedFlag)
+                if (!hasMovedFlag)
                 {
                     tabCount += 1;
                 }
@@ -98,14 +87,11 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
         {
             tabCount = 0;
         }
-
-
-
     }
 
     private void ZoomMapx2()
     {
-        mapImage.sizeDelta = new Vector2(
+        ChangeMapSize(
                 mapImage.sizeDelta.x * 1.5f,
                 mapImage.sizeDelta.y * 1.5f
             );
@@ -129,11 +115,11 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
         // Find the difference in the distances between each frame.
         float deltaMagnitudeDiff = prevTouchDeltaMag - touchDeltaMag;
 
-        mapImage.sizeDelta = new Vector2(
+        mapImage.sizeDelta = new Vector2(                               // warn sizedelta use 2 here
             mapImage.sizeDelta.x - (deltaMagnitudeDiff * zoomSpeed),
             mapImage.sizeDelta.y - (deltaMagnitudeDiff * zoomSpeed)
         );
-        mapImage.sizeDelta = new Vector2(
+        ChangeMapSize(
             Mathf.Clamp(mapImage.sizeDelta.x, Screen.width - mapPadding, 3000),
             Mathf.Clamp(mapImage.sizeDelta.y, Screen.width - mapPadding, 3000)
         );
@@ -143,14 +129,241 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
 
     private void RestoreMap()
     {
-        mapImage.sizeDelta = new Vector2(Screen.width - mapPadding, Screen.width - mapPadding);
+        ChangeMapSize(Screen.width - mapPadding, Screen.width - mapPadding);
         mapImage.anchoredPosition = new Vector2(0, 0);
         IsNormalSize = true;
     }
 
-    public void OnPointerClick(PointerEventData eventData)
+    public void UpdateMap(GameObject floorObject)
+    //recive floor obj to change from canvasbutton 
+    //change floor pic and find path
     {
-        Debug.Log("It's me: " + name);
+        RestoreMap();
+        BuildingData building = floorObject.GetComponent<FloorData>().GetBuilding().GetComponent<BuildingData>();
+        // get material from first child of floorData 
+        Material floorMaterial = floorObject.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>().materials[0];
+        this.gameObject.GetComponent<Image>().material = floorMaterial;
+        ShowMarkerOfFloor(floorObject);
 
+        //check floor, start stop of that floor for line
+        if (MainController.instance.appState == MainController.AppState.Navigate
+            && MainController.instance.destinationPoint != null)
+        {
+            GameObject beginFloor = MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor();
+            GameObject destinationFloor = MainController.instance.destinationPoint.GetComponent<MarkerData>().GetFloor();
+            if (MainController.instance.beginPoint.GetComponent<MarkerData>().
+                IsSameFloorWith(MainController.instance.destinationPoint.GetComponent<MarkerData>().floor)
+                && beginFloor == floorObject)
+                //building.IsSameFloor(MainController.instance.beginPoint, MainController.instance.destinationPoint) //loking fl in same
+            {
+                nodeForLineArr[0] = MainController.instance.beginPoint;
+                nodeForLineArr[1] = MainController.instance.destinationPoint;
+                Debug.Log(" Show Line In Same Floor");
+            }
+            else
+            {
+                if (beginFloor == floorObject)
+                { //swap to begin fl
+                    nodeForLineArr[0] = MainController.instance.beginPoint;
+                    nodeForLineArr[1] = building.GetConnector(MainController.instance.beginPoint);
+                }
+                else if (destinationFloor == floorObject)
+                { //swap in dest fl
+                    nodeForLineArr[0] = building.GetConnector(MainController.instance.destinationPoint);
+                    nodeForLineArr[1] = MainController.instance.destinationPoint;
+                }
+                else
+                {
+                    //check is looking floor are inbeetween 
+                    //if yes green dot in lift
+                    if (beginFloor.GetComponent<FloorData>().floorIndex < destinationFloor.GetComponent<FloorData>().floorIndex
+                        && floorObject.GetComponent<FloorData>().floorIndex < destinationFloor.GetComponent<FloorData>().floorIndex
+                        && floorObject.GetComponent<FloorData>().floorIndex > beginFloor.GetComponent<FloorData>().floorIndex)
+                    {
+                        nodeForLineArr[0] = floorObject.GetComponent<FloorData>().connectorList[0];
+                        nodeForLineArr[1] = null;
+                    }
+                    else if (beginFloor.GetComponent<FloorData>().floorIndex > destinationFloor.GetComponent<FloorData>().floorIndex
+                      && floorObject.GetComponent<FloorData>().floorIndex > destinationFloor.GetComponent<FloorData>().floorIndex
+                      && floorObject.GetComponent<FloorData>().floorIndex < beginFloor.GetComponent<FloorData>().floorIndex)
+                    {
+                        nodeForLineArr[0] = floorObject.GetComponent<FloorData>().connectorList[0];
+                        nodeForLineArr[1] = null;
+                    }
+                    else
+                    {
+                        nodeForLineArr[0] = null;
+                        nodeForLineArr[1] = null;
+                    }
+                    //if no, will not show line in 
+                }
+            }
+        }
+        else if (MainController.instance.appState == MainController.AppState.Idle)
+        {
+            nodeForLineArr[0] = null;
+            nodeForLineArr[1] = null;
+        }
+        //check floor and current position for user dot
+        userDot.SetActive(false);
+        if (MainController.instance.beginPoint != null)
+        {
+            if (MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor() == floorObject)
+            {
+                ShowUserDot(MainController.instance.beginPoint);
+                isUserInThisFloor = true;
+            }
+        }
+        showingFloor = floorObject;
     }
+
+    private void ChangeMapSize(float xSize, float ySize)
+    {
+        mapImage.sizeDelta = new Vector2(xSize, ySize);
+        ShowMarkerOfFloor();
+        DrawLine();
+        if(isUserInThisFloor){ShowUserDot(MainController.instance.beginPoint);}
+    }
+
+    
+
+
+    #region In Map Component
+
+    public void ShowMarkerOfFloor() /* resize marker with map size */
+    {
+        GameObject markers = mapImage.transform.GetChild(0).gameObject;
+        //destroy all marker
+        foreach (Transform ch in markers.transform)
+        {
+            Destroy(ch.gameObject);
+        }
+        //create marker prefab
+        List<GameObject> markerList = showingFloor.GetComponent<FloorData>().markerList;
+        foreach (GameObject markerob in markerList)
+        {
+            //instantiate marker at child of Markers
+            GameObject markerDot = Instantiate(markerPrefab);
+            MarkerData markerdata = markerob.GetComponent<MarkerData>();
+            markerDot.transform.SetParent(markers.transform);
+            //recttransform coordinate xy 1000/mapimage.sizedelta
+            markerDot.GetComponent<RectTransform>().anchoredPosition = new Vector2(
+                markerdata.position.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+                markerdata.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+            );
+        }
+    }
+
+    public void ShowMarkerOfFloor(GameObject floorObject) /* show marker in map */
+    {
+        GameObject markers = mapImage.transform.GetChild(0).gameObject;
+        //destroy all marker
+        foreach (Transform ch in markers.transform)
+        {
+            Destroy(ch.gameObject);
+        }
+        //create marker prefab
+        List<GameObject> markerList = floorObject.GetComponent<FloorData>().markerList;
+        foreach (GameObject markerob in markerList)
+        {
+            //instantiate marker at child of Markers
+            GameObject markerDot = Instantiate(markerPrefab);
+            MarkerData markerdata = markerob.GetComponent<MarkerData>();
+            markerDot.transform.SetParent(markers.transform);
+            //recttransform coordinate xy 1000/mapimage.sizedelta
+            markerDot.GetComponent<RectTransform>().anchoredPosition = new Vector2(
+                markerdata.position.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+                markerdata.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+            );
+        }
+    }
+
+    private void DrawLine() /* draw line with map ize */
+    {
+        if(nodeForLineArr[0] == null && nodeForLineArr[1] == null)
+        {
+            ClearLine();
+        }
+        else if(nodeForLineArr[0] != null && nodeForLineArr[1] == null)
+        {
+            ShowLine(nodeForLineArr[0]);
+        }
+        else if(nodeForLineArr[0] != null && nodeForLineArr[1] != null)
+        {
+            ShowLine(nodeForLineArr[0], nodeForLineArr[1]);
+        }
+    }
+
+    private void ShowLine(GameObject begin, GameObject destination) /* show green navigate line on map */
+    {
+        UILineRenderer line = navline.GetComponent<UILineRenderer>();
+        line.Points.Clear();
+        MarkerData checkPoint = begin.GetComponent<MarkerData>();
+        int i = 0;
+        //Debug.Log("Write Line At " + checkPoint.markerName + " " + line.Points(i));
+        while (checkPoint.successor != null)
+        {
+            Debug.Log("Checking Point are " + checkPoint.markerName);
+            // last point point to marker position
+            line.Points.Add(new Vector2(
+                checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+                checkPoint.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+            ));
+            i++;
+            checkPoint = checkPoint.successor.GetComponent<MarkerData>();
+        }
+        // add last point
+        line.Points.Add(new Vector2(
+            checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+            checkPoint.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+        ));
+        line.Points.Add(new Vector2(
+            checkPoint.position.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+            checkPoint.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+        ));
+        line.SetVerticesDirty();
+    }
+
+    private void ShowLine(GameObject point) /*draw line on connector point */
+    {
+        Debug.Log(" in Lift");
+        UILineRenderer line = navline.GetComponent<UILineRenderer>();
+        line.Points.Clear();
+        MarkerData checkPoint = point.GetComponent<MarkerData>();
+
+        line.Points.Add(new Vector2(
+            checkPoint.position.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+            checkPoint.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+        ));
+        line.Points.Add(new Vector2(
+            checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+            checkPoint.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+        ));
+        line.SetVerticesDirty();
+    }
+
+    private void ClearLine() /* don't show line in that floor */
+    {
+        UILineRenderer line = navline.GetComponent<UILineRenderer>();
+        line.Points.Clear();
+        line.SetVerticesDirty();
+    }
+
+    private void ShowUserDot(GameObject point)
+    {
+        userDot.SetActive(true);
+        MarkerData markerdata = point.GetComponent<MarkerData>();
+        RectTransform dotRect = userDot.GetComponent<RectTransform>();
+        dotRect.anchoredPosition = new Vector2(
+            markerdata.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+            markerdata.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+        );
+        float deltaX = markerdata.referencePosition.x - markerdata.position.x;
+        float deltaY = markerdata.referencePosition.z - markerdata.position.z;
+        dotRect.rotation = Quaternion.Euler(new Vector3(0, 0,
+            (((Mathf.Atan2(deltaY, deltaX)) * 180 / Mathf.PI) + 90)
+        ));
+    }
+    #endregion
+
 }
