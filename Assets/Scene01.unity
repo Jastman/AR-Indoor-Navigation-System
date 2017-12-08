@@ -34631,7 +34631,6 @@ GameObject:
   - component: {fileID: 1791605299}
   - component: {fileID: 1791605298}
   - component: {fileID: 1791605300}
-  - component: {fileID: 1791605301}
   - component: {fileID: 1791605302}
   m_Layer: 5
   m_Name: Canvas
@@ -34779,17 +34778,6 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 55c5a183308413f4780830364c45ca75, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
---- !u!114 &1791605301
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 1791605292}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 66996fea44d98e245b79306832bfe5d6, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &1791605302
@@ -39925,6 +39913,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   mapImageObject: {fileID: 2077644705}
+  markerPrefab: {fileID: 0}
 --- !u!43 &2083307278
 Mesh:
   m_ObjectHideFlags: 0
