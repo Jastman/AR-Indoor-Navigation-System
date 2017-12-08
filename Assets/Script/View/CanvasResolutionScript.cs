@@ -15,7 +15,7 @@ public class CanvasResolutionScript : MonoBehaviour {
          xhdpi
      }
 
-	private float actionBarHeight;
+	public float actionBarHeight;
 
 	public GameObject actionBar, searchPanel, mapPanel;
 	public Text debugText;
@@ -146,6 +146,7 @@ public class CanvasResolutionScript : MonoBehaviour {
 		searchContent.cellSize = new Vector2(searchList.sizeDelta.x - spacingofcellsize, actionBarHeight*0.9f);
 		searchContent.spacing = new Vector2(searchContent.cellSize.y*spacingofcellsize, searchContent.cellSize.y*spacingofcellsize);
 	}
+
 	#endregion
 
 	#region Set Map UI

@@ -9,7 +9,7 @@ public class MainController : MonoBehaviour
     private DijsktraAlgorithm dijsktra;
     private CanvasButtonScript canvasButton;
     private ShowStateManager showState;
-    private CanvasResolutionScript canvasResolution;
+    //private CanvasResolutionScript canvasResolution;
     public GameObject beginPoint = null;
     public GameObject destinationPoint = null;
     public GameObject reachedPoint = null;
@@ -31,7 +31,7 @@ public class MainController : MonoBehaviour
             instance = this;
             dijsktra = new DijsktraAlgorithm();
             canvasButton = GameObject.Find("Canvas").GetComponent<CanvasButtonScript>();
-            canvasResolution = GameObject.Find("Canvas").GetComponent<CanvasResolutionScript>();
+            //canvasResolution = GameObject.Find("Canvas").GetComponent<CanvasResolutionScript>();
             showState = GameObject.Find("Canvas").GetComponent<ShowStateManager>();
         }
         else if (instance != this)

@@ -279,7 +279,6 @@ public class CanvasButtonScript : MonoBehaviour
     }
 
     #endregion
-    
 
     #region Search Action
 
@@ -338,7 +337,7 @@ public class CanvasButtonScript : MonoBehaviour
             roomButton.transform.SetParent(searchContent.transform);
             Text roomButtonText = roomButton.transform.GetChild(0).gameObject.GetComponent<Text>();
             roomButtonText.text = markerdata.roomName;
-            roomButtonText.fontSize = canvasResolutionScript.GetScaledFontSize(45);
+            roomButtonText.fontSize = canvasResolutionScript.GetScaledFontSize(40);
             if (!beginColored)
             {
                 if (MainController.instance.beginPoint.GetComponent<MarkerData>().roomName == markerdata.roomName)
@@ -391,8 +390,10 @@ public class CanvasButtonScript : MonoBehaviour
         {
             GameObject beginFloor = MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor();
             GameObject destinationFloor = MainController.instance.destinationPoint.GetComponent<MarkerData>().GetFloor();
-            if (building.IsSameFloor(MainController.instance.beginPoint, MainController.instance.destinationPoint) //loking fl in same
+            if (MainController.instance.beginPoint.GetComponent<MarkerData>().
+                IsSameFloorWith(MainController.instance.destinationPoint.GetComponent<MarkerData>().floor)
                 && beginFloor == floorObject)
+                //building.IsSameFloor(MainController.instance.beginPoint, MainController.instance.destinationPoint) //loking fl in same
             {
                 ShowLine(MainController.instance.beginPoint, MainController.instance.destinationPoint);
                 Debug.Log(" Show Line In Same Floor");

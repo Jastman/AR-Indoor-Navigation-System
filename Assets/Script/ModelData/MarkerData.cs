@@ -100,9 +100,22 @@ public class MarkerData : MonoBehaviour, ICloneable {
 		return markerDataClone;
     }
 
+#region Floor Method
+
 	public GameObject GetFloor() /* return gameObject of floorData */
 	{
 		//if(this.transform.parent.gameObject.GetComponent<FloorData>() != null)
 		return this.transform.parent.gameObject;
 	}
+
+	public bool IsSameFloorWith(string compareFloor)
+	{
+		if(this.floor == compareFloor)
+		{
+			return true;
+		}
+		return false;
+	}
+#endregion
+	
 }
