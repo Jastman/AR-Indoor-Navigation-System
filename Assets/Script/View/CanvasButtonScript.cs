@@ -18,7 +18,7 @@ public class CanvasButtonScript : MonoBehaviour
     private GameObject roomNameTitle, roomMapImage, roomDesData, roomNavigateButton;
     private GameObject mapImage, rightButton, leftButton, navline, userDot;
 
-    private BuildingData building;
+    
     private GameObject showingFloor;
     private List<GameObject> searchShowList;
 
@@ -31,6 +31,8 @@ public class CanvasButtonScript : MonoBehaviour
     private Page page = Page.Main;
 
     private CanvasResolutionScript canvasResolutionScript;
+    private MapControlScript mapControl;
+    private BuildingData building;
     private ToastMessageScript toastMessageScript;
 
     private bool canQuitApp = true;
@@ -70,11 +72,12 @@ public class CanvasButtonScript : MonoBehaviour
         roomNavigateButton = roomDataDialog.transform.Find("NavigateButton").gameObject;
 
         /* map */
-        mapImage = mapPanel.transform.Find("MapImage").gameObject;
+        mapImage = mapPanel.transform.Find("MapScrollViewArea").gameObject;
         rightButton = mapPanel.transform.Find("RightButton").gameObject;
         leftButton = mapPanel.transform.Find("LeftButton").gameObject;
-        navline = mapImage.transform.Find("Line").gameObject;
-        userDot = mapImage.transform.Find("UserDot").gameObject;
+        mapControl = mapImage.transform.Find("Mask/MapImage").gameObject.GetComponent<MapControlScript>();
+        // navline = mapImage.transform.Find("Line").gameObject;
+        // userDot = mapImage.transform.Find("UserDot").gameObject;
 
         backButton.SetActive(false);
         searchInputField.SetActive(false);
@@ -193,7 +196,8 @@ public class CanvasButtonScript : MonoBehaviour
         {
             showingFloor = MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor();
         }
-        UpdateMap(showingFloor);
+        Debug.Log("onopenmap");
+        mapControl.UpdateMap(showingFloor);
     }
 
     public void OnCloseMap()
@@ -366,183 +370,185 @@ public class CanvasButtonScript : MonoBehaviour
 
     public void OnShiftMap(bool isForward)
     {
-        BuildingData building = showingFloor.GetComponent<FloorData>().GetBuilding().GetComponent<BuildingData>();
+        //BuildingData building = showingFloor.GetComponent<FloorData>().GetBuilding().GetComponent<BuildingData>();
 
         //get next floor from buildingData
         GameObject floorObject = isForward ?
             building.GetNextFloor(showingFloor.GetComponent<FloorData>().floorName) :
             building.GetPreviousFloor(showingFloor.GetComponent<FloorData>().floorName);
-
-        UpdateMap(floorObject);
-    }
-
-    private void UpdateMap(GameObject floorObject) /* Update current floor of map page */
-    {
-        BuildingData building = floorObject.GetComponent<FloorData>().GetBuilding().GetComponent<BuildingData>();
-        // get material from first child of floorData 
-        Material floorMaterial = floorObject.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>().materials[0];
-        mapImage.GetComponent<Image>().material = floorMaterial;
-        ShowMarkerOfFloor(floorObject);
-
-        //check floor, start stop of that floor for line
-        if (MainController.instance.appState == MainController.AppState.Navigate
-            && MainController.instance.destinationPoint != null)
-        {
-            GameObject beginFloor = MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor();
-            GameObject destinationFloor = MainController.instance.destinationPoint.GetComponent<MarkerData>().GetFloor();
-            if (MainController.instance.beginPoint.GetComponent<MarkerData>().
-                IsSameFloorWith(MainController.instance.destinationPoint.GetComponent<MarkerData>().floor)
-                && beginFloor == floorObject)
-                //building.IsSameFloor(MainController.instance.beginPoint, MainController.instance.destinationPoint) //loking fl in same
-            {
-                ShowLine(MainController.instance.beginPoint, MainController.instance.destinationPoint);
-                Debug.Log(" Show Line In Same Floor");
-            }
-            else
-            {
-                if (beginFloor == floorObject)
-                { //swap to begin fl
-                    ShowLine(MainController.instance.beginPoint, building.GetConnector(MainController.instance.beginPoint));
-                }
-                else if (destinationFloor == floorObject)
-                { //swap in dest fl
-                    ShowLine(building.GetConnector(MainController.instance.destinationPoint), MainController.instance.destinationPoint);
-                }
-                else
-                {
-                    //check is looking floor are inbeetween 
-                    //if yes green dot in lift
-                    if (beginFloor.GetComponent<FloorData>().floorIndex < destinationFloor.GetComponent<FloorData>().floorIndex
-                        && floorObject.GetComponent<FloorData>().floorIndex < destinationFloor.GetComponent<FloorData>().floorIndex
-                        && floorObject.GetComponent<FloorData>().floorIndex > beginFloor.GetComponent<FloorData>().floorIndex)
-                    {
-                        ShowLine(floorObject.GetComponent<FloorData>().connectorList[0]);
-                    }
-                    else if (beginFloor.GetComponent<FloorData>().floorIndex > destinationFloor.GetComponent<FloorData>().floorIndex
-                      && floorObject.GetComponent<FloorData>().floorIndex > destinationFloor.GetComponent<FloorData>().floorIndex
-                      && floorObject.GetComponent<FloorData>().floorIndex < beginFloor.GetComponent<FloorData>().floorIndex)
-                    {
-                        ShowLine(floorObject.GetComponent<FloorData>().connectorList[0]);
-                    }
-                    else
-                    {
-                        ClearLine();
-                    }
-                    //if no, will not show line in 
-                }
-            }
-        }
-        else if (MainController.instance.appState == MainController.AppState.Idle)
-        {
-            ClearLine();
-        }
-        //check floor and current position for user dot
-        userDot.SetActive(false);
-        if (MainController.instance.beginPoint != null)
-        {
-            if (MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor() == floorObject)
-            {
-                ShowUserDot(MainController.instance.beginPoint);
-            }
-        }
-
+        Debug.Log("shiftmap forward:" + isForward);
+        mapControl.UpdateMap(floorObject);
         showingFloor = floorObject;
     }
 
-    public void ShowMarkerOfFloor(GameObject floorObject) /* show marker in map */
-    {
-        GameObject markers = mapImage.transform.GetChild(0).gameObject;
-        //destroy all marker
-        foreach (Transform ch in markers.transform)
-        {
-            Destroy(ch.gameObject);
-        }
-        //create marker prefab
-        List<GameObject> markerList = floorObject.GetComponent<FloorData>().markerList;
-        foreach (GameObject markerob in markerList)
-        {
-            //instantiate marker at child of Markers
-            GameObject markerDot = Instantiate(markerPrefab);
-            MarkerData markerdata = markerob.GetComponent<MarkerData>();
-            markerDot.transform.SetParent(markers.transform);
-            //recttransform coordinate xy 1000/mapimage.sizedelta
-            markerDot.GetComponent<RectTransform>().anchoredPosition = new Vector2(
-                markerdata.position.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
-                markerdata.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
-            );
-        }
-    }
 
-    private void ShowLine(GameObject begin, GameObject destination) /* show green navigate line on map */
-    {
-        UILineRenderer line = navline.GetComponent<UILineRenderer>();
-        line.Points.Clear();
-        MarkerData checkPoint = begin.GetComponent<MarkerData>();
-        int i = 0;
-        //Debug.Log("Write Line At " + checkPoint.markerName + " " + line.Points(i));
-        while (checkPoint.successor != null)
-        {
-            Debug.Log("Checking Point are " + checkPoint.markerName);
-            // last point point to marker position
-            line.Points.Add(new Vector2(
-                checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
-                checkPoint.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
-            ));
-            i++;
-            checkPoint = checkPoint.successor.GetComponent<MarkerData>();
-        }
-        // add last point
-        line.Points.Add(new Vector2(
-            checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
-            checkPoint.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
-        ));
-        line.Points.Add(new Vector2(
-            checkPoint.position.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
-            checkPoint.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
-        ));
-        line.SetVerticesDirty();
-    }
+    // private void UpdateMap(GameObject floorObject) /* Update current floor of map page */
+    // {
+    //     BuildingData building = floorObject.GetComponent<FloorData>().GetBuilding().GetComponent<BuildingData>();
+    //     // get material from first child of floorData 
+    //     Material floorMaterial = floorObject.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>().materials[0];
+    //     mapImage.GetComponent<Image>().material = floorMaterial;
+    //     ShowMarkerOfFloor(floorObject);
 
-    private void ShowLine(GameObject point) /*draw line on connector point */
-    {
-        Debug.Log(" in Lift");
-        UILineRenderer line = navline.GetComponent<UILineRenderer>();
-        line.Points.Clear();
-        MarkerData checkPoint = point.GetComponent<MarkerData>();
+    //     //check floor, start stop of that floor for line
+    //     if (MainController.instance.appState == MainController.AppState.Navigate
+    //         && MainController.instance.destinationPoint != null)
+    //     {
+    //         GameObject beginFloor = MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor();
+    //         GameObject destinationFloor = MainController.instance.destinationPoint.GetComponent<MarkerData>().GetFloor();
+    //         if (MainController.instance.beginPoint.GetComponent<MarkerData>().
+    //             IsSameFloorWith(MainController.instance.destinationPoint.GetComponent<MarkerData>().floor)
+    //             && beginFloor == floorObject)
+    //             //building.IsSameFloor(MainController.instance.beginPoint, MainController.instance.destinationPoint) //loking fl in same
+    //         {
+    //             ShowLine(MainController.instance.beginPoint, MainController.instance.destinationPoint);
+    //             Debug.Log(" Show Line In Same Floor");
+    //         }
+    //         else
+    //         {
+    //             if (beginFloor == floorObject)
+    //             { //swap to begin fl
+    //                 ShowLine(MainController.instance.beginPoint, building.GetConnector(MainController.instance.beginPoint));
+    //             }
+    //             else if (destinationFloor == floorObject)
+    //             { //swap in dest fl
+    //                 ShowLine(building.GetConnector(MainController.instance.destinationPoint), MainController.instance.destinationPoint);
+    //             }
+    //             else
+    //             {
+    //                 //check is looking floor are inbeetween 
+    //                 //if yes green dot in lift
+    //                 if (beginFloor.GetComponent<FloorData>().floorIndex < destinationFloor.GetComponent<FloorData>().floorIndex
+    //                     && floorObject.GetComponent<FloorData>().floorIndex < destinationFloor.GetComponent<FloorData>().floorIndex
+    //                     && floorObject.GetComponent<FloorData>().floorIndex > beginFloor.GetComponent<FloorData>().floorIndex)
+    //                 {
+    //                     ShowLine(floorObject.GetComponent<FloorData>().connectorList[0]);
+    //                 }
+    //                 else if (beginFloor.GetComponent<FloorData>().floorIndex > destinationFloor.GetComponent<FloorData>().floorIndex
+    //                   && floorObject.GetComponent<FloorData>().floorIndex > destinationFloor.GetComponent<FloorData>().floorIndex
+    //                   && floorObject.GetComponent<FloorData>().floorIndex < beginFloor.GetComponent<FloorData>().floorIndex)
+    //                 {
+    //                     ShowLine(floorObject.GetComponent<FloorData>().connectorList[0]);
+    //                 }
+    //                 else
+    //                 {
+    //                     ClearLine();
+    //                 }
+    //                 //if no, will not show line in 
+    //             }
+    //         }
+    //     }
+    //     else if (MainController.instance.appState == MainController.AppState.Idle)
+    //     {
+    //         ClearLine();
+    //     }
+    //     //check floor and current position for user dot
+    //     userDot.SetActive(false);
+    //     if (MainController.instance.beginPoint != null)
+    //     {
+    //         if (MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor() == floorObject)
+    //         {
+    //             ShowUserDot(MainController.instance.beginPoint);
+    //         }
+    //     }
 
-        line.Points.Add(new Vector2(
-            checkPoint.position.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
-            checkPoint.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
-        ));
-        line.Points.Add(new Vector2(
-            checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
-            checkPoint.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
-        ));
-        line.SetVerticesDirty();
-    }
+    //     showingFloor = floorObject;
+    // }
 
-    private void ClearLine() /* don't show line in that floor */
-    {
-        UILineRenderer line = navline.GetComponent<UILineRenderer>();
-        line.Points.Clear();
-        line.SetVerticesDirty();
-    }
+    // public void ShowMarkerOfFloor(GameObject floorObject) /* show marker in map */
+    // {
+    //     GameObject markers = mapImage.transform.GetChild(0).gameObject;
+    //     //destroy all marker
+    //     foreach (Transform ch in markers.transform)
+    //     {
+    //         Destroy(ch.gameObject);
+    //     }
+    //     //create marker prefab
+    //     List<GameObject> markerList = floorObject.GetComponent<FloorData>().markerList;
+    //     foreach (GameObject markerob in markerList)
+    //     {
+    //         //instantiate marker at child of Markers
+    //         GameObject markerDot = Instantiate(markerPrefab);
+    //         MarkerData markerdata = markerob.GetComponent<MarkerData>();
+    //         markerDot.transform.SetParent(markers.transform);
+    //         //recttransform coordinate xy 1000/mapimage.sizedelta
+    //         markerDot.GetComponent<RectTransform>().anchoredPosition = new Vector2(
+    //             markerdata.position.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+    //             markerdata.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+    //         );
+    //     }
+    // }
 
-    private void ShowUserDot(GameObject point)
-    {
-        userDot.SetActive(true);
-        MarkerData markerdata = point.GetComponent<MarkerData>();
-        RectTransform dotRect = userDot.GetComponent<RectTransform>();
-        dotRect.anchoredPosition = new Vector2(
-            markerdata.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
-            markerdata.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
-        );
-        float deltaX = markerdata.referencePosition.x - markerdata.position.x;
-        float deltaY = markerdata.referencePosition.z - markerdata.position.z;
-        dotRect.rotation = Quaternion.Euler(new Vector3(0, 0,
-            (((Mathf.Atan2(deltaY, deltaX)) * 180 / Mathf.PI) + 90)
-        ));
-    }
+    // private void ShowLine(GameObject begin, GameObject destination) /* show green navigate line on map */
+    // {
+    //     UILineRenderer line = navline.GetComponent<UILineRenderer>();
+    //     line.Points.Clear();
+    //     MarkerData checkPoint = begin.GetComponent<MarkerData>();
+    //     int i = 0;
+    //     //Debug.Log("Write Line At " + checkPoint.markerName + " " + line.Points(i));
+    //     while (checkPoint.successor != null)
+    //     {
+    //         Debug.Log("Checking Point are " + checkPoint.markerName);
+    //         // last point point to marker position
+    //         line.Points.Add(new Vector2(
+    //             checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+    //             checkPoint.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+    //         ));
+    //         i++;
+    //         checkPoint = checkPoint.successor.GetComponent<MarkerData>();
+    //     }
+    //     // add last point
+    //     line.Points.Add(new Vector2(
+    //         checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+    //         checkPoint.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+    //     ));
+    //     line.Points.Add(new Vector2(
+    //         checkPoint.position.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+    //         checkPoint.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+    //     ));
+    //     line.SetVerticesDirty();
+    // }
+
+    // private void ShowLine(GameObject point) /*draw line on connector point */
+    // {
+    //     Debug.Log(" in Lift");
+    //     UILineRenderer line = navline.GetComponent<UILineRenderer>();
+    //     line.Points.Clear();
+    //     MarkerData checkPoint = point.GetComponent<MarkerData>();
+
+    //     line.Points.Add(new Vector2(
+    //         checkPoint.position.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+    //         checkPoint.position.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+    //     ));
+    //     line.Points.Add(new Vector2(
+    //         checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+    //         checkPoint.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+    //     ));
+    //     line.SetVerticesDirty();
+    // }
+
+    // private void ClearLine() /* don't show line in that floor */
+    // {
+    //     UILineRenderer line = navline.GetComponent<UILineRenderer>();
+    //     line.Points.Clear();
+    //     line.SetVerticesDirty();
+    // }
+
+    // private void ShowUserDot(GameObject point)
+    // {
+    //     userDot.SetActive(true);
+    //     MarkerData markerdata = point.GetComponent<MarkerData>();
+    //     RectTransform dotRect = userDot.GetComponent<RectTransform>();
+    //     dotRect.anchoredPosition = new Vector2(
+    //         markerdata.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
+    //         markerdata.referencePosition.z * (mapImage.GetComponent<RectTransform>().sizeDelta.y / 1000)
+    //     );
+    //     float deltaX = markerdata.referencePosition.x - markerdata.position.x;
+    //     float deltaY = markerdata.referencePosition.z - markerdata.position.z;
+    //     dotRect.rotation = Quaternion.Euler(new Vector3(0, 0,
+    //         (((Mathf.Atan2(deltaY, deltaX)) * 180 / Mathf.PI) + 90)
+    //     ));
+    // }
 
     #endregion
 

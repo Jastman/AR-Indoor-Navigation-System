@@ -116,6 +116,15 @@ public class MarkerData : MonoBehaviour, ICloneable {
 		}
 		return false;
 	}
+
+	public bool IsSameFloorWith(GameObject compareFloorObj)
+	{
+		if(this.floor == compareFloorObj.GetComponent<MarkerData>().floor)
+		{
+			return true;
+		}
+		return false;
+	}
 #endregion
 	
 }

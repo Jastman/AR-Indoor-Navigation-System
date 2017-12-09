@@ -63,11 +63,11 @@ public class CanvasResolutionScript : MonoBehaviour {
 		searchContent = viewPort.gameObject.transform.Find("Content").gameObject.GetComponent<GridLayoutGroup>();
 
 		/* map */
-		mapImage = mapPanel.transform.Find("MapImage").GetComponent<RectTransform>();
+		mapImage = mapPanel.transform.Find("MapScrollViewArea").GetComponent<RectTransform>();
 		rightButton = mapPanel.transform.Find("RightButton").GetComponent<RectTransform>();
 		leftButton = mapPanel.transform.Find("LeftButton").GetComponent<RectTransform>();
-		navline = mapImage.gameObject.transform.Find("Line").GetComponent<RectTransform>();
-		userDot = mapImage.gameObject.transform.Find("UserDot").GetComponent<RectTransform>();
+		// navline = mapImage.gameObject.transform.Find("Line").GetComponent<RectTransform>();
+		// userDot = mapImage.gameObject.transform.Find("UserDot").GetComponent<RectTransform>();
 	}
 	
 	// Update is called once per frame
@@ -165,8 +165,8 @@ public class CanvasResolutionScript : MonoBehaviour {
 		float mapPadding = 30f;
 		mapImage.sizeDelta = new Vector2(Screen.width-mapPadding, Screen.width-mapPadding);
 		mapImage.anchoredPosition = new Vector2(0, actionBarHeight/1.3f);
-		navline.sizeDelta = mapImage.sizeDelta;
-		navline.anchoredPosition = Vector2.zero;
+		// navline.sizeDelta = mapImage.sizeDelta;
+		// navline.anchoredPosition = Vector2.zero;
 	}
 	public void SetArrowButtonInMap()
 	{

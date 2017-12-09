@@ -12,24 +12,41 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
     public GameObject markerPrefab;
     private GameObject navline, userDot;
     private int tabCount = 0;
-    private float maxDoubleTabTime = 0.3f;
+    private float maxDoubleTabTime = 0.5f;
     private float newTime;
     private float zoomSpeed = 0.5f;
     private bool IsNormalSize;
     private bool hasMovedFlag = false;
     private bool isUserInThisFloor = false;
-    float mapPadding = 30f;
+    float mapPadding = 30.0f;
 
     private GameObject[] nodeForLineArr = new GameObject[3];
     private GameObject showingFloor;
+    private BuildingData building;
 
     RectTransform mapImage;
 
     // Use this for initialization
     void Start()
     {
-        mapImage = gameObject.GetComponent<RectTransform>();
-        RestoreMap();
+        Debug.Log("==================Start");
+        mapImage = this.gameObject.GetComponent<RectTransform>();
+        navline = this.transform.Find("Line").gameObject;
+        userDot = this.transform.Find("UserDot").gameObject;
+        // !!! warn !!!  showingfloor change when change bulding
+        building = GameObject.Find("IT Buiding").GetComponent<BuildingData>();
+        showingFloor = building.floorList[0];
+    }
+
+    void Awake()
+    {
+        Debug.Log("===================Awake");
+        mapImage = this.gameObject.GetComponent<RectTransform>();
+        navline = this.transform.Find("Line").gameObject;
+        userDot = this.transform.Find("UserDot").gameObject;
+        // !!! warn !!!  showingfloor change when change bulding
+        building = GameObject.Find("IT Buiding").GetComponent<BuildingData>();
+        showingFloor = building.floorList[0];
     }
 
     // Update is called once per frame
@@ -129,6 +146,7 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
 
     private void RestoreMap()
     {
+        int mapsize = Mathf.FloorToInt(Screen.width - mapPadding);
         ChangeMapSize(Screen.width - mapPadding, Screen.width - mapPadding);
         mapImage.anchoredPosition = new Vector2(0, 0);
         IsNormalSize = true;
@@ -139,55 +157,63 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
     //change floor pic and find path
     {
         RestoreMap();
-        BuildingData building = floorObject.GetComponent<FloorData>().GetBuilding().GetComponent<BuildingData>();
+        //BuildingData building = floorObject.GetComponent<FloorData>().GetBuilding().GetComponent<BuildingData>();
         // get material from first child of floorData 
         Material floorMaterial = floorObject.transform.GetChild(0).gameObject.GetComponent<MeshRenderer>().materials[0];
         this.gameObject.GetComponent<Image>().material = floorMaterial;
         ShowMarkerOfFloor(floorObject);
 
+        FloorData floorObjectData = floorObject.GetComponent<FloorData>();
+
+        GameObject beginPoint = MainController.instance.beginPoint;
+        GameObject destinationPoint = MainController.instance.destinationPoint;        
+
         //check floor, start stop of that floor for line
-        if (MainController.instance.appState == MainController.AppState.Navigate
-            && MainController.instance.destinationPoint != null)
+        if (MainController.instance.appState == MainController.AppState.Navigate 
+            && beginPoint != null && destinationPoint != null)
         {
+            MarkerData beginPointData = beginPoint.GetComponent<MarkerData>();
+            MarkerData destinationPointData = destinationPoint.GetComponent<MarkerData>();
             GameObject beginFloor = MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor();
             GameObject destinationFloor = MainController.instance.destinationPoint.GetComponent<MarkerData>().GetFloor();
-            if (MainController.instance.beginPoint.GetComponent<MarkerData>().
-                IsSameFloorWith(MainController.instance.destinationPoint.GetComponent<MarkerData>().floor)
-                && beginFloor == floorObject)
-                //building.IsSameFloor(MainController.instance.beginPoint, MainController.instance.destinationPoint) //loking fl in same
+            FloorData beginFloorData = beginFloor.GetComponent<FloorData>();
+            FloorData destinationFloorData = destinationFloor.GetComponent<FloorData>();
+
+            if (beginPointData.IsSameFloorWith(destinationPoint) && beginFloor == floorObject)
+            //building.IsSameFloor(MainController.instance.beginPoint, MainController.instance.destinationPoint) //loking fl in same
             {
-                nodeForLineArr[0] = MainController.instance.beginPoint;
-                nodeForLineArr[1] = MainController.instance.destinationPoint;
+                nodeForLineArr[0] = beginPoint;
+                nodeForLineArr[1] = destinationPoint;
                 Debug.Log(" Show Line In Same Floor");
             }
             else
             {
                 if (beginFloor == floorObject)
                 { //swap to begin fl
-                    nodeForLineArr[0] = MainController.instance.beginPoint;
-                    nodeForLineArr[1] = building.GetConnector(MainController.instance.beginPoint);
+                    nodeForLineArr[0] = beginPoint;
+                    nodeForLineArr[1] = beginFloorData.GetConnector();
                 }
                 else if (destinationFloor == floorObject)
                 { //swap in dest fl
-                    nodeForLineArr[0] = building.GetConnector(MainController.instance.destinationPoint);
-                    nodeForLineArr[1] = MainController.instance.destinationPoint;
+                    nodeForLineArr[0] = destinationFloorData.GetConnector();
+                    nodeForLineArr[1] = destinationPoint;
                 }
                 else
                 {
                     //check is looking floor are inbeetween 
                     //if yes green dot in lift
-                    if (beginFloor.GetComponent<FloorData>().floorIndex < destinationFloor.GetComponent<FloorData>().floorIndex
-                        && floorObject.GetComponent<FloorData>().floorIndex < destinationFloor.GetComponent<FloorData>().floorIndex
-                        && floorObject.GetComponent<FloorData>().floorIndex > beginFloor.GetComponent<FloorData>().floorIndex)
+                    if (beginFloorData.floorIndex < destinationFloorData.floorIndex
+                        && floorObjectData.floorIndex < destinationFloorData.floorIndex
+                        && floorObjectData.floorIndex > beginFloorData.floorIndex)
                     {
-                        nodeForLineArr[0] = floorObject.GetComponent<FloorData>().connectorList[0];
+                        nodeForLineArr[0] = floorObjectData.connectorList[0];
                         nodeForLineArr[1] = null;
                     }
-                    else if (beginFloor.GetComponent<FloorData>().floorIndex > destinationFloor.GetComponent<FloorData>().floorIndex
-                      && floorObject.GetComponent<FloorData>().floorIndex > destinationFloor.GetComponent<FloorData>().floorIndex
-                      && floorObject.GetComponent<FloorData>().floorIndex < beginFloor.GetComponent<FloorData>().floorIndex)
+                    else if (beginFloorData.floorIndex > destinationFloorData.floorIndex
+                      && floorObjectData.floorIndex > destinationFloorData.floorIndex
+                      && floorObjectData.floorIndex < beginFloorData.floorIndex)
                     {
-                        nodeForLineArr[0] = floorObject.GetComponent<FloorData>().connectorList[0];
+                        nodeForLineArr[0] = floorObjectData.connectorList[0];
                         nodeForLineArr[1] = null;
                     }
                     else
@@ -204,9 +230,10 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
             nodeForLineArr[0] = null;
             nodeForLineArr[1] = null;
         }
+        DrawLine();
         //check floor and current position for user dot
         userDot.SetActive(false);
-        if (MainController.instance.beginPoint != null)
+        if (beginPoint != null)
         {
             if (MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor() == floorObject)
             {
@@ -217,15 +244,16 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
         showingFloor = floorObject;
     }
 
-    private void ChangeMapSize(float xSize, float ySize)
+    public void ChangeMapSize(float xSize, float ySize)
     {
+        Debug.Log("changeMapSize sizedelta " + GetComponent<RectTransform>().sizeDelta);
         mapImage.sizeDelta = new Vector2(xSize, ySize);
+        navline.GetComponent<RectTransform>().sizeDelta = mapImage.sizeDelta;
+        navline.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
         ShowMarkerOfFloor();
         DrawLine();
-        if(isUserInThisFloor){ShowUserDot(MainController.instance.beginPoint);}
+        if (isUserInThisFloor) { ShowUserDot(MainController.instance.beginPoint); }
     }
-
-    
 
 
     #region In Map Component
@@ -278,17 +306,17 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
         }
     }
 
-    private void DrawLine() /* draw line with map ize */
+    private void DrawLine() /* draw line with map size */
     {
-        if(nodeForLineArr[0] == null && nodeForLineArr[1] == null)
+        if (nodeForLineArr[0] == null && nodeForLineArr[1] == null)
         {
             ClearLine();
         }
-        else if(nodeForLineArr[0] != null && nodeForLineArr[1] == null)
+        else if (nodeForLineArr[0] != null && nodeForLineArr[1] == null)
         {
             ShowLine(nodeForLineArr[0]);
         }
-        else if(nodeForLineArr[0] != null && nodeForLineArr[1] != null)
+        else if (nodeForLineArr[0] != null && nodeForLineArr[1] != null)
         {
             ShowLine(nodeForLineArr[0], nodeForLineArr[1]);
         }
