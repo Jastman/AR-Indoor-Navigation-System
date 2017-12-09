@@ -29,7 +29,6 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
     // Use this for initialization
     void Start()
     {
-        Debug.Log("==================Start");
         mapImage = this.gameObject.GetComponent<RectTransform>();
         navline = this.transform.Find("Line").gameObject;
         userDot = this.transform.Find("UserDot").gameObject;
@@ -40,7 +39,6 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
 
     void Awake()
     {
-        Debug.Log("===================Awake");
         mapImage = this.gameObject.GetComponent<RectTransform>();
         navline = this.transform.Find("Line").gameObject;
         userDot = this.transform.Find("UserDot").gameObject;
@@ -63,7 +61,6 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
     public void OnPointerClick(PointerEventData eventData)
     //implement from ipointerclickhandler for click one time only
     {
-        Debug.Log("It's me: " + name);
         if (Input.touchCount == 1)
         {
             Touch touch = Input.GetTouch(0);
@@ -96,7 +93,6 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
                     ZoomMapx2();
                 }
                 //Whatever you want after a dubble tap    
-                print("Dubble tap");
                 tabCount = 0;
             }
         }
@@ -184,7 +180,6 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
             {
                 nodeForLineArr[0] = beginPoint;
                 nodeForLineArr[1] = destinationPoint;
-                Debug.Log(" Show Line In Same Floor");
             }
             else
             {
@@ -233,6 +228,7 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
         DrawLine();
         //check floor and current position for user dot
         userDot.SetActive(false);
+        isUserInThisFloor = false;
         if (beginPoint != null)
         {
             if (MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor() == floorObject)
@@ -246,7 +242,6 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
 
     public void ChangeMapSize(float xSize, float ySize)
     {
-        Debug.Log("changeMapSize sizedelta " + GetComponent<RectTransform>().sizeDelta);
         mapImage.sizeDelta = new Vector2(xSize, ySize);
         navline.GetComponent<RectTransform>().sizeDelta = mapImage.sizeDelta;
         navline.GetComponent<RectTransform>().anchoredPosition = Vector2.zero;
@@ -331,7 +326,6 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
         //Debug.Log("Write Line At " + checkPoint.markerName + " " + line.Points(i));
         while (checkPoint.successor != null)
         {
-            Debug.Log("Checking Point are " + checkPoint.markerName);
             // last point point to marker position
             line.Points.Add(new Vector2(
                 checkPoint.referencePosition.x * (mapImage.GetComponent<RectTransform>().sizeDelta.x / 1000),
@@ -354,7 +348,6 @@ public class MapControlScript : MonoBehaviour, IPointerClickHandler
 
     private void ShowLine(GameObject point) /*draw line on connector point */
     {
-        Debug.Log(" in Lift");
         UILineRenderer line = navline.GetComponent<UILineRenderer>();
         line.Points.Clear();
         MarkerData checkPoint = point.GetComponent<MarkerData>();
