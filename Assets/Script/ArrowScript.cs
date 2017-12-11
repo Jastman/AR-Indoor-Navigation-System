@@ -25,6 +25,17 @@ public class ArrowScript : MonoBehaviour {
 		Debug.Log(transform.rotation.eulerAngles + " " + (eulerRotation.y-transform.rotation.y) + " " + eulerRotation.y);
 	}
 
+	public void PointArrowUp()
+	{
+		transform.rotation = transform.parent.rotation;
+		transform.Rotate(new Vector3(90, 0, 0));
+	}
+	public void PointArrowDown()
+	{
+		transform.rotation = transform.parent.rotation;
+		transform.Rotate(new Vector3(270, 0, 0));
+	}
+
 	public void PointToZero()
 	{
 		transform.rotation = transform.parent.rotation;

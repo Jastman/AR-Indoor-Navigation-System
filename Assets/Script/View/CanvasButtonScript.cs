@@ -196,7 +196,6 @@ public class CanvasButtonScript : MonoBehaviour
         {
             showingFloor = MainController.instance.beginPoint.GetComponent<MarkerData>().GetFloor();
         }
-        Debug.Log("onopenmap");
         mapControl.UpdateMap(showingFloor);
     }
 

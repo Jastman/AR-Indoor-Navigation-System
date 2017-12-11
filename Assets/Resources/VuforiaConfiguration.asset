@@ -44,10 +44,16 @@ MonoBehaviour:
       ContainsMagnet: 0
   databaseLoad:
     dataSetsToLoad:
+    - ITFloor6
+    - ITFloor5
+    - ITFloor2
     - ITFloor3
     - ITFloor1
     - TestMarkerDB
     dataSetsToActivate:
+    - ITFloor6
+    - ITFloor5
+    - ITFloor2
     - ITFloor3
     - ITFloor1
     - TestMarkerDB

@@ -53,7 +53,7 @@ public class MainController : MonoBehaviour
     }
 
     #region SetPoint
-        
+
     public void SetBeginPoint(GameObject beginPoint)
     /* create started AR when camera detect marker */
     {
@@ -86,8 +86,8 @@ public class MainController : MonoBehaviour
     {
         //if (destinationPoint.GetComponent<MarkerData>() != null)
         //{
-            this.destinationPoint = destinationPoint;
-            //Debug.Log("Set Destination Point to " + destinationPoint.GetComponent<MarkerData>().roomName);
+        this.destinationPoint = destinationPoint;
+        //Debug.Log("Set Destination Point to " + destinationPoint.GetComponent<MarkerData>().roomName);
         //}
         //canvasButton.OnDestinationPointChange(destinationPoint);
         switch (appState)
@@ -125,7 +125,7 @@ public class MainController : MonoBehaviour
     #endregion
 
     #region Navigate
-        
+
     private bool NavigateIfNotSamePoint()
     /* check before navigate that two new point didn't met destination 
     return true if two point didn't same room and go to navigate*/
@@ -176,10 +176,11 @@ public class MainController : MonoBehaviour
         }
         else
         {
-            Debug.Log("Different Floor  Navigating " + this.beginPoint.GetComponent<MarkerData>().floor + " To " + this.destinationPoint.GetComponent<MarkerData>().floor);
+            Debug.Log("==================================== Different Floor  Navigating " + this.beginPoint.GetComponent<MarkerData>().floor + " To " + this.destinationPoint.GetComponent<MarkerData>().floor);
             bool begintoLift = dijsktra.FindShortestPath(
                     this.beginPoint.GetComponent<MarkerData>().GetFloor(),
                     this.beginPoint, building.GetConnector(this.beginPoint));
+            Debug.Log("==================================== brk");
             bool liftToDest = dijsktra.FindShortestPath(
                     this.destinationPoint.GetComponent<MarkerData>().GetFloor(),
                     building.GetConnector(this.destinationPoint), this.destinationPoint);
@@ -196,7 +197,7 @@ public class MainController : MonoBehaviour
     }
     #endregion
 
-#region ShowAR
+    #region ShowAR
     //function recive prefabType loop all child if met active it and flag as met, if meet more than one destroy it
     public void ShowAR(GameObject objectToAugment)
     /* show AR depending on state, works with ArControlScript, navigate before show */
@@ -231,16 +232,34 @@ public class MainController : MonoBehaviour
             arControl.CreateArrow();
             if (navigatable)
             {
-                Debug.Log("point to " + objectToAugment.GetComponent<MarkerData>().successor.GetComponent<MarkerData>().position);
+                Debug.Log("navigatable point to " + objectToAugment.GetComponent<MarkerData>().successor.GetComponent<MarkerData>().position);
                 arControl.GetArrow().GetComponent<ArrowScript>().PointToCoordinate(
                     objectToAugment.GetComponent<MarkerData>().successor.GetComponent<MarkerData>().position);
             }
             else
             {
-                objectToAugment.GetComponentInChildren<ArrowScript>()
-                        .PointToCoordinate(this.destinationPoint.GetComponent<MarkerData>().position);
+                int beginfloor = this.beginPoint.GetComponent<MarkerData>().GetFloor().GetComponent<FloorData>().floorIndex;
+                int destfloor = this.destinationPoint.GetComponent<MarkerData>().GetFloor().GetComponent<FloorData>().floorIndex;
+                if (beginfloor < destfloor)
+                {
+                    Debug.Log("point down");
+                    arControl.GetArrow().GetComponent<ArrowScript>().PointArrowUp();
+                }
+                else if (beginfloor > destfloor)
+                {
+                    Debug.Log("point up");
+                    arControl.GetArrow().GetComponent<ArrowScript>().PointArrowDown();
+                }
+                else
+                {
+                    Debug.Log("ObjecttoAugmnt " + objectToAugment.name + " pointing");
+                    arControl.GetArrow().GetComponent<ArrowScript>()
+                            .PointToCoordinate(this.destinationPoint.GetComponent<MarkerData>().position);
+                    objectToAugment.GetComponentInChildren<ArrowScript>()
+                            .PointToCoordinate(this.destinationPoint.GetComponent<MarkerData>().position);
+                }
             }
         }
     }
-#endregion
+    #endregion
 }

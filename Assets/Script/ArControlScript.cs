@@ -20,46 +20,6 @@ public class ArControlScript : MonoBehaviour
 
     }
 
-    public void AugmentAR()
-    /* show AR depending on state, works with ArControlScript, navigate before show */
-    {
-        MainController.AppState appState = MainController.instance.appState;
-        ArControlScript arControl = gameObject.GetComponent<ArControlScript>();
-        foreach (Transform child in gameObject.transform)
-        {
-            child.gameObject.SetActive(false);
-        }
-
-        if (appState == MainController.AppState.Idle) //set desboard if not in old node or navigated to destination
-        {
-            if (MainController.instance.beginPoint != null && MainController.instance.reachedPoint != null)
-            {
-                CreateDescriptionBoard();
-                if (gameObject.GetComponent<MarkerData>().roomName 
-                    == MainController.instance.reachedPoint.GetComponent<MarkerData>().roomName)
-                {
-                    CreateCheckTrue();
-                    Debug.Log(" Reach at Main ShowAR Idle Mode and idle");
-                }
-            }
-        }
-        else if (appState == MainController.AppState.Navigate)  //set arrow
-        {
-            CreateArrow();
-            if (MainController.instance.navigatable)
-            {
-                Debug.Log("point to " + gameObject.GetComponent<MarkerData>().successor.GetComponent<MarkerData>().position);
-                GetArrow().GetComponent<ArrowScript>().PointToCoordinate(
-                    gameObject.GetComponent<MarkerData>().successor.GetComponent<MarkerData>().position);
-            }
-            else
-            {
-                gameObject.GetComponentInChildren<ArrowScript>()
-                        .PointToCoordinate(MainController.instance.destinationPoint.GetComponent<MarkerData>().position);
-            }
-        }
-    }
-
     public GameObject CreateArrow() /* find or create Arrow AR return script of arrow */
     {
         List<ArrowScript> arrowList = new List<ArrowScript>();
