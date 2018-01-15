@@ -6,8 +6,6 @@ using UnityEngine;
 
 public class DijsktraAlgorithm : MonoBehaviour {
 
-	private FloorData floorData;
-
 	// Use this for initialization
 	void Start () {
 		

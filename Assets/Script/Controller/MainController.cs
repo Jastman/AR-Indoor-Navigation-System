@@ -7,9 +7,8 @@ public class MainController : MonoBehaviour
 
     public static MainController instance;
     private DijsktraAlgorithm dijsktra;
-    private CanvasButtonScript canvasButton;
+    //private CanvasButtonScript canvasButton;
     private ShowStateManager showState;
-    //private CanvasResolutionScript canvasResolution;
     public GameObject beginPoint = null;
     public GameObject destinationPoint = null;
     public GameObject reachedPoint = null;
@@ -30,8 +29,7 @@ public class MainController : MonoBehaviour
         {
             instance = this;
             dijsktra = new DijsktraAlgorithm();
-            canvasButton = GameObject.Find("Canvas").GetComponent<CanvasButtonScript>();
-            //canvasResolution = GameObject.Find("Canvas").GetComponent<CanvasResolutionScript>();
+            //canvasButton = GameObject.Find("Canvas").GetComponent<CanvasButtonScript>();
             showState = GameObject.Find("Canvas").GetComponent<ShowStateManager>();
         }
         else if (instance != this)
@@ -57,29 +55,32 @@ public class MainController : MonoBehaviour
     public void SetBeginPoint(GameObject beginPoint)
     /* create started AR when camera detect marker */
     {
-        if (beginPoint.GetComponent<MarkerData>() != null)
+        if(oldBeginPoint != beginPoint)
         {
-            this.beginPoint = beginPoint;
-            Debug.Log("Set Begin Point to " + beginPoint.GetComponent<MarkerData>().roomName);
+            if (beginPoint.GetComponent<MarkerData>() != null)
+            {
+                this.beginPoint = beginPoint;
+                Debug.Log("Set Begin Point to " + beginPoint.GetComponent<MarkerData>().roomName);
+            }
+            //canvasButton.OnBeginPointChange(beginPoint);
+            switch (appState)
+            {
+                case AppState.Idle:
+                    if (this.beginPoint != null && this.destinationPoint != null)       // already has destpoint
+                    {
+                        NavigateIfNotSamePoint(); //dest not are this pos
+                    }
+                    break;
+                case AppState.Navigate:         //beginpoint will not null, dest not null in nav
+                    NavigateIfNotSamePoint();   //new pos not same dest
+                    break;
+                default:
+                    appState = AppState.Idle;
+                    break;
+            }
+            showState.OnBeginPointChange(beginPoint);
+            oldBeginPoint = beginPoint;
         }
-        //canvasButton.OnBeginPointChange(beginPoint);
-        switch (appState)
-        {
-            case AppState.Idle:
-                if (this.beginPoint != null && this.destinationPoint != null)       // already has destpoint
-                {
-                    NavigateIfNotSamePoint(); //dest not are this pos
-                }
-                break;
-            case AppState.Navigate:         //beginpoint will not null, dest not null in nav
-                NavigateIfNotSamePoint();   //new pos not same dest
-                break;
-            default:
-                appState = AppState.Idle;
-                break;
-        }
-        showState.OnBeginPointChange(beginPoint);
-        oldBeginPoint = beginPoint;
         ShowAR(beginPoint); //remove if user can set
     }
     public void SetDestinationPoint(GameObject destinationPoint)

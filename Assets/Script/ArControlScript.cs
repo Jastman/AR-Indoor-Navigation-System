@@ -41,6 +41,7 @@ public class ArControlScript : MonoBehaviour
 
         arrowObj.transform.SetParent(gameObject.transform);
         arrowObj.transform.localPosition = Vector3.zero;
+        arrowObj.transform.localPosition += objectPosition;
         arrowObj.transform.rotation = arrowObj.transform.parent.rotation;
         arrowObj.transform.localScale = Vector3.one * arrowSize;
 
@@ -72,6 +73,7 @@ public class ArControlScript : MonoBehaviour
         }
         checktrueObj.transform.SetParent(gameObject.transform);
         checktrueObj.transform.localPosition = Vector3.zero;
+        checktrueObj.transform.localPosition += objectPosition;
         checktrueObj.transform.rotation = gameObject.transform.parent.rotation;
         checktrueObj.transform.localScale = Vector3.one * checkSize;
         Debug.Log(gameObject.name + " attract checkTrue to found dest");
@@ -99,6 +101,7 @@ public class ArControlScript : MonoBehaviour
         }
         desBoardObj.transform.SetParent(gameObject.transform);
         desBoardObj.transform.localPosition = Vector3.zero;
+        desBoardObj.transform.localPosition += objectPosition;
         desBoardObj.transform.rotation = desBoardObj.transform.parent.rotation;
         desBoardObj.transform.localScale = Vector3.one * descriptionBoardSize;
 
@@ -111,6 +114,8 @@ public class ArControlScript : MonoBehaviour
     }
 
 	public GameObject GetArrow()
+    /* activate arrow in child and return it, if none create new one
+    return Arrow Object that contains arrowScript */
 	{
 		foreach (Transform child in gameObject.transform)
 		{
